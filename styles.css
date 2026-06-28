@@ -134,7 +134,7 @@ body {
   background: var(--vice-pink);
   color: var(--vice-white);
   position: relative;
-  padding: 3.5rem 1.5rem 2.5rem;
+  padding: 6rem 1.5rem 2.5rem;
   text-align: center;
   overflow: hidden;
 }
@@ -163,7 +163,7 @@ body {
 
 .drip svg {
   width: 100%;
-  height: 80px;
+  height: 90px;
   display: block;
 }
 
@@ -449,20 +449,22 @@ body {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Signature strip */
-.gallery-signature {
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+.site-footer {
   background: var(--vice-pink);
   text-align: center;
-  padding: 2.5rem 1rem;
-  margin-top: 2rem;
+  padding: 2.5rem 2rem 2rem;
 }
 
-.signature-text {
-  font-family: 'Caveat', cursive;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  font-weight: 700;
-  color: var(--vice-white);
-  text-shadow: 2px 3px 0 var(--vice-dark-pink);
+.footer-graffiti {
+  max-width: min(700px, 88vw);
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.18));
 }
 
 /* Social section */
@@ -905,7 +907,7 @@ body {
     padding: 0.35rem 0.55rem;
   }
 
-  .hero { padding: 3rem 1rem 2rem; }
+  .hero { padding: 6rem 1rem 2rem; }
 
   .filter-bar {
     padding: 0.7rem 1rem;
