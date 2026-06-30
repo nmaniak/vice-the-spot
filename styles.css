@@ -957,36 +957,6 @@ body {
   }
 }
 
-/* ═══════════════════════════════════════
-   SITE-WIDE BANNER
-═══════════════════════════════════════ */
-.site-banner {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-}
-
-.site-banner-img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  object-position: center 30%;
-  display: block;
-}
-
-.site-banner-corner {
-  position: absolute;
-  bottom: 10px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1rem;
-  letter-spacing: 0.12em;
-  color: white;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-}
-
-.site-banner-corner--left  { left: 1rem; }
-.site-banner-corner--right { right: 1rem; }
 
 /* ═══════════════════════════════════════
    GAME
