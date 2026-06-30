@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawBg() {
     if (bgReady) {
       ctx.drawImage(bgImg, 0, 0, W, H);
-      ctx.fillStyle = 'rgba(0,0,0,0.52)';
+      ctx.fillStyle = 'rgba(0,0,0,0.28)';
       ctx.fillRect(0, 0, W, H);
     } else {
       const g = ctx.createLinearGradient(0, 0, 0, H);
