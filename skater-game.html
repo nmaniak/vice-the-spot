@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Skater vs Cop Pig</title>
+<title>Skater Game</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body { width: 100%; height: 100%; overflow: hidden; background: #0e0e1a; }
@@ -39,7 +39,7 @@
   const LEVEL_EVERY  = 12;
   const BASE_SHOOT   = 2.6;
   const SHOOT_MIN    = 1.0;
-  const SHOT_HEIGHTS = [0, 28, 50, 70]; // px above ground
+  const SHOT_HEIGHTS = [0, 28, 50, 75]; // 75 clears standing player's head
 
   let W, H, GROUND;
 
@@ -132,26 +132,33 @@
     ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
     ctx.fillStyle = '#c87941'; ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'rgba(10,10,20,0.85)'; ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#ff88aa';
+    ctx.fillStyle = s.safe ? '#ffd700' : '#ff88aa';
     ctx.beginPath(); ctx.arc(0, 0, s.r * 0.78, Math.PI + 0.3, -0.3); ctx.arc(0, 0, s.r * 0.55, -0.3, Math.PI + 0.3, true); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
-    ctx.fillStyle = '#ffee00'; ctx.fillRect(2, s.r * 0.4, 3, 2);
-    ctx.fillStyle = '#fff'; ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+    if (s.safe) {
+      ctx.fillStyle = '#fff';    ctx.fillRect(-5, -s.r * 0.55, 3, 2);
+      ctx.fillStyle = '#ff3377'; ctx.fillRect(2,   s.r * 0.35, 3, 2);
+    } else {
+      ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
+      ctx.fillStyle = '#ffee00'; ctx.fillRect(2,   s.r * 0.4, 3, 2);
+      ctx.fillStyle = '#fff';    ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+    }
     ctx.restore();
   }
 
   /* ---- shoot ---- */
   function shoot() {
     const h = SHOT_HEIGHTS[Math.floor(Math.random() * SHOT_HEIGHTS.length)];
-    const scaledH = Math.round(h * (H / 260)); // scale height to canvas size
+    const scale = H / 260;
+    const safe = h >= 70;
     shots.push({
       x: W - Math.round(W * 0.12),
-      y: GROUND - scaledH,
+      y: GROUND - Math.round(h * scale),
       vx: -spd,
-      r: Math.round(12 * (H / 260)),
+      r: Math.round(12 * scale),
       rot: 0,
       rotSpd: (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 5),
       scored: false,
+      safe,
     });
     copShooting = 0.25;
   }
@@ -183,12 +190,8 @@
   function drawIdle() {
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.62)'; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#ff3377'; ctx.font = `bold ${Math.round(H * 0.1)}px "Arial Black",sans-serif`;
-    ctx.fillText('SKATER VS COP PIG', W / 2, H / 2 - H * 0.14);
-    ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.round(H * 0.06)}px Arial`;
+    ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.round(H * 0.07)}px "Arial Black",sans-serif`;
     ctx.fillText('TAP TO START', W / 2, H / 2);
-    ctx.fillStyle = '#888'; ctx.font = `${Math.round(H * 0.04)}px Arial`;
-    ctx.fillText("Dodge the cop's donuts", W / 2, H / 2 + H * 0.1);
     ctx.restore();
   }
 
@@ -196,7 +199,7 @@
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff3377'; ctx.font = `bold ${Math.round(H * 0.14)}px "Arial Black",sans-serif`;
-    ctx.fillText('BUSTED!', W / 2, H / 2 - H * 0.18);
+    ctx.fillText('GAME OVER', W / 2, H / 2 - H * 0.18);
     ctx.fillStyle = '#fff'; ctx.font = `bold ${Math.round(H * 0.07)}px Arial`;
     ctx.fillText('Score: ' + score, W / 2, H / 2);
     if (score > 0 && score >= hiScore) {

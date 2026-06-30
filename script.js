@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =======================================
-   SKATER VS COP PIG - GAME
+   SKATER GAME
 ======================================= */
 (function () {
   'use strict';
@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  /* ---- cop pig ---- */
+  /* ---- villain ---- */
   function drawCopPig() {
     // SVG viewBox 0 0 80 120; boot bottom at y=117, align to groundY
     // body center in SVG at x=48, align to W-70 on screen
@@ -183,12 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  /* ---- cop shots: donuts at varied heights ---- */
-  // Heights above ground: 0=rolling, 28=low, 50=mid, 70=high (passes over standing player)
-  const SHOT_HEIGHTS = [0, 28, 50, 70];
+  /* ---- donuts at varied heights ---- */
+  // safe=true → donut flies above standing skater (gold icing — don't jump!)
+  const SHOT_HEIGHTS = [0, 28, 50, 75];  // 75 clears the standing player's head
 
   function shoot() {
     const h = SHOT_HEIGHTS[Math.floor(Math.random() * SHOT_HEIGHTS.length)];
+    const safe = h >= 70;
     shots.push({
       x: W - 90,
       y: groundY - h,
@@ -197,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
       rot: 0,
       rotSpd: (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 5),
       scored: false,
+      safe,
     });
     copShooting = 0.25;
   }
@@ -205,18 +207,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.save();
     ctx.translate(s.x, s.y);
     ctx.rotate(s.rot);
-    // donut body
     ctx.fillStyle = '#c87941';
     ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = 'rgba(10,10,20,0.85)';
     ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
-    // icing
-    ctx.fillStyle = '#ff88aa';
+    // safe donuts get gold icing; dangerous ones get pink
+    ctx.fillStyle = s.safe ? '#ffd700' : '#ff88aa';
     ctx.beginPath(); ctx.arc(0, 0, s.r * 0.78, Math.PI + 0.3, -0.3); ctx.arc(0, 0, s.r * 0.55, -0.3, Math.PI + 0.3, true); ctx.closePath(); ctx.fill();
-    // sprinkles
-    ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
-    ctx.fillStyle = '#ffee00'; ctx.fillRect(2,   s.r * 0.4, 3, 2);
-    ctx.fillStyle = '#fff';    ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+    if (s.safe) {
+      ctx.fillStyle = '#fff';    ctx.fillRect(-5, -s.r * 0.55, 3, 2);
+      ctx.fillStyle = '#ff3377'; ctx.fillRect(2,   s.r * 0.35, 3, 2);
+    } else {
+      ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
+      ctx.fillStyle = '#ffee00'; ctx.fillRect(2,   s.r * 0.4, 3, 2);
+      ctx.fillStyle = '#fff';    ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+    }
     ctx.restore();
   }
 
@@ -298,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fillStyle = 'rgba(0,0,0,0.72)'; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff3377'; ctx.font = 'bold 46px "Bebas Neue",sans-serif';
-    ctx.fillText('BUSTED!', W/2, H/2 - 48);
+    ctx.fillText('GAME OVER', W/2, H/2 - 48);
     ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Bebas Neue",sans-serif';
     ctx.fillText('SCORE: ' + score, W/2, H/2);
     if (score > 0 && score >= hiScore) {
@@ -351,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
       P.vy += GRAV * dt; P.y += P.vy * dt; P.frameTimer += dt;
       if (P.y >= groundY) { P.y = groundY; P.vy = 0; P.grounded = true; }
 
-      // cop shoots
+      // shoot donuts
       const shootInterval = Math.max(SHOOT_MIN, BASE_SHOOT - (level - 1) * 0.18);
       if (shootTimer >= shootInterval) { shoot(); shootTimer = 0; }
 
