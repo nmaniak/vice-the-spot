@@ -23,7 +23,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@700&family=Inter:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat:wght@700&family=Inter:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet"/>
 
   <link rel="stylesheet" href="styles.css"/>
 </head>
@@ -59,6 +59,21 @@
     ══════════════════════════════════ -->
     <div id="page-menu" class="page active" role="tabpanel">
 
+      <!-- Drip header -->
+      <div class="menu-drip-bar" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 72" preserveAspectRatio="xMidYMid slice">
+          <rect width="1000" height="30" fill="white"/>
+          <!-- Left drips -->
+          <path d="M58,30 C55,43 49,57 49,68 C49,75 53,79 58,79 C63,79 67,75 67,68 C67,57 61,43 58,30Z" fill="white"/>
+          <path d="M118,30 C115,45 108,63 108,76 C108,84 112,88 118,88 C124,88 128,84 128,76 C128,63 121,45 118,30Z" fill="white"/>
+          <path d="M170,30 C168,40 163,51 163,59 C163,65 166,69 170,69 C174,69 177,65 177,59 C177,51 172,40 170,30Z" fill="white"/>
+          <!-- Right drips -->
+          <path d="M830,30 C827,42 822,55 822,65 C822,72 825,75 830,75 C835,75 838,72 838,65 C838,55 833,42 830,30Z" fill="white"/>
+          <path d="M884,30 C881,45 875,63 875,76 C875,84 879,88 884,88 C889,88 893,84 893,76 C893,63 887,45 884,30Z" fill="white"/>
+          <path d="M938,30 C936,40 931,51 931,60 C931,66 934,70 938,70 C942,70 945,66 945,60 C945,51 940,40 938,30Z" fill="white"/>
+        </svg>
+      </div>
+
       <!-- Filter bar -->
       <div class="filter-bar" role="group" aria-label="Φίλτρα κατηγοριών">
         <button class="filter-btn active" data-filter="all"        onclick="filterMenu(this)">Όλα</button>
@@ -76,7 +91,7 @@
 
         <!-- COFFEES -->
         <section class="menu-section" data-category="coffees">
-          <h2 class="section-title">☕ Coffees</h2>
+          <h2 class="section-title">COFFEES</h2>
           <p class="section-note">Grande +1,00€</p>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Freddo Espresso</span><span class="item-price">2,40€</span></div>
@@ -100,7 +115,7 @@
 
         <!-- CHOCOLATES -->
         <section class="menu-section" data-category="chocolates">
-          <h2 class="section-title">🍫 Σοκολάτες</h2>
+          <h2 class="section-title">CHOCOLATES</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Classic</span><span class="item-price">2,80€</span></div>
             <div class="menu-item"><span class="item-name">White</span><span class="item-price">3,00€</span></div>
@@ -115,7 +130,7 @@
 
         <!-- TEA -->
         <section class="menu-section" data-category="tea">
-          <h2 class="section-title">🍵 Hot Tea</h2>
+          <h2 class="section-title">HOT TEA</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Χαμομήλι</span><span class="item-price">2,50€</span></div>
             <div class="menu-item"><span class="item-name">Βουνού με Μέλι &amp; Λεμόνι</span><span class="item-price">2,50€</span></div>
@@ -124,7 +139,7 @@
             <div class="menu-item"><span class="item-name">Μαύρο Τσάι Ρόδι</span><span class="item-price">2,50€</span></div>
           </div>
 
-          <h2 class="section-title" style="margin-top:2rem;">🧊 Ice Tea</h2>
+          <h2 class="subsection-title">ICE TEA</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Lipton Ροδάκινο</span><span class="item-price">2,50€</span></div>
             <div class="menu-item"><span class="item-name">Lipton Λεμόνι</span><span class="item-price">2,50€</span></div>
@@ -134,7 +149,7 @@
 
         <!-- SOFT DRINKS -->
         <section class="menu-section" data-category="soft">
-          <h2 class="section-title">🥤 Αναψυκτικά</h2>
+          <h2 class="section-title">ΑΝΑΨΥΚΤΙΚΑ</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Pepsi</span><span class="item-price">2,50€</span></div>
             <div class="menu-item"><span class="item-name">Pepsi Max</span><span class="item-price">2,50€</span></div>
@@ -146,18 +161,18 @@
             <div class="menu-item"><span class="item-name">Tsiki Creamy Peach</span><span class="item-price">3,00€</span></div>
           </div>
 
-          <h2 class="section-title" style="margin-top:2rem;">⚡ Energy Drinks</h2>
+          <h2 class="subsection-title">ENERGY DRINKS</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Red Bull</span><span class="item-price">4,00€</span></div>
             <div class="menu-item"><span class="item-name">Hell</span><span class="item-price">2,50€</span></div>
           </div>
 
-          <h2 class="section-title" style="margin-top:2rem;">💧 Νερό</h2>
+          <h2 class="subsection-title">WATER</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Seli 0,5L</span><span class="item-price">0,50€</span></div>
           </div>
 
-          <h2 class="section-title" style="margin-top:2rem;">🍊 Χυμοί ΗΒΗ</h2>
+          <h2 class="subsection-title">ΧΥΜΟΙ</h2>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">ΗΒΗ Πορτοκάλι</span><span class="item-price">2,50€</span></div>
             <div class="menu-item"><span class="item-name">ΗΒΗ Βύσσινο</span><span class="item-price">2,50€</span></div>
@@ -170,7 +185,7 @@
 
         <!-- COCKTAILS -->
         <section class="menu-section" data-category="cocktails">
-          <h2 class="section-title">🍹 Cocktails</h2>
+          <h2 class="section-title">COCKTAILS</h2>
           <div class="menu-grid menu-grid--cocktails">
             <div class="menu-item menu-item--cocktail">
               <div><span class="item-name">Mojito</span><span class="item-ingredients">White rum, lime juice, sugar syrup, mint leaves, soda</span></div>
@@ -241,7 +256,7 @@
 
         <!-- SUMMER COCKTAILS -->
         <section class="menu-section" data-category="summer">
-          <h2 class="section-title">🌴 Summer Cocktails</h2>
+          <h2 class="section-title">SUMMER COCKTAILS</h2>
           <div class="menu-grid menu-grid--cocktails">
             <div class="menu-item menu-item--cocktail">
               <div><span class="item-name">Tropical Haze</span><span class="item-ingredients">Vodka, apple puree, pineapple puree, lime juice</span></div>
@@ -264,7 +279,7 @@
 
         <!-- SPIRITS -->
         <section class="menu-section" data-category="spirits">
-          <h2 class="section-title">🥃 Spirits</h2>
+          <h2 class="section-title">ALCOHOL DRINKS</h2>
           <div class="spirits-grid">
 
             <div class="spirits-category">

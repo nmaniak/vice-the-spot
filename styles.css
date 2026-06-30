@@ -148,6 +148,252 @@ body {
 }
 
 /* ═══════════════════════════════════════
+   MENU PAGE — PDF STYLE
+═══════════════════════════════════════ */
+#page-menu {
+  background: var(--vice-pink);
+}
+
+/* Drip bar */
+.menu-drip-bar {
+  line-height: 0;
+  overflow: hidden;
+  background: var(--vice-pink);
+}
+.menu-drip-bar svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 88px;
+}
+
+/* Filter bar on pink bg */
+#page-menu .filter-bar {
+  background: rgba(0,0,0,0.2);
+  border-bottom: none;
+}
+#page-menu .filter-btn {
+  background: transparent;
+  color: rgba(255,255,255,0.75);
+  border-color: rgba(255,255,255,0.35);
+}
+#page-menu .filter-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border-color: rgba(255,255,255,0.7);
+}
+#page-menu .filter-btn.active {
+  background: white;
+  color: var(--vice-pink);
+  border-color: white;
+}
+
+/* Sections container */
+#page-menu .menu-sections {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+/* Primary section title — full-width banner */
+#page-menu .section-title {
+  font-family: 'Anton', Impact, 'Bebas Neue', sans-serif;
+  font-size: clamp(2.2rem, 7vw, 4rem);
+  letter-spacing: 6px;
+  text-align: center;
+  text-transform: uppercase;
+  color: white;
+  background: rgba(0,0,0,0.2);
+  border-top: 2px solid rgba(255,255,255,0.35);
+  border-bottom: 2px solid rgba(255,255,255,0.35);
+  padding: 0.45rem 1.5rem;
+  margin: 1.8rem -1.5rem 1.2rem;
+}
+
+/* Sub-section title — inline with underline */
+#page-menu .subsection-title {
+  font-family: 'Anton', Impact, 'Bebas Neue', sans-serif;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: white;
+  border-bottom: 3px solid rgba(255,255,255,0.45);
+  padding-bottom: 0.2rem;
+  margin: 1.8rem 0 0.8rem;
+  display: inline-block;
+}
+
+/* Section note — white pill */
+#page-menu .section-note {
+  display: block;
+  width: fit-content;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--vice-pink);
+  background: white;
+  border-radius: 40px;
+  padding: 0.3rem 1.4rem;
+  margin: 0.8rem 0 0;
+  font-style: normal;
+}
+
+/* Menu grid — 2-column */
+#page-menu .menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 2.5rem;
+  row-gap: 0;
+}
+
+/* Menu item — transparent, white text, dotted leader */
+#page-menu .menu-item {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0.28rem 0;
+  display: flex;
+  align-items: baseline;
+  position: relative;
+}
+#page-menu .menu-item:hover {
+  box-shadow: none;
+  border-color: transparent;
+}
+
+/* Dotted leader spanning full width */
+#page-menu .menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.38em;
+  border-bottom: 2px dotted rgba(255,255,255,0.28);
+  pointer-events: none;
+}
+
+#page-menu .item-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+  color: white;
+  text-transform: uppercase;
+  background: var(--vice-pink);
+  padding-right: 0.35rem;
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 4.5rem);
+  flex: none;
+}
+
+#page-menu .item-price {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: white;
+  background: var(--vice-pink);
+  padding-left: 0.35rem;
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  white-space: nowrap;
+  flex: none;
+}
+
+#page-menu .item-badge {
+  background: rgba(255,255,255,0.22);
+  color: white;
+  font-size: 0.58rem;
+  letter-spacing: 0.5px;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+}
+
+/* Cocktail items on pink */
+#page-menu .menu-grid--cocktails {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+  margin: 0 auto;
+}
+#page-menu .menu-item--cocktail {
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0.4rem 0;
+  gap: 0.5rem;
+}
+#page-menu .menu-item--cocktail::before { display: none; }
+#page-menu .menu-item--cocktail .item-name {
+  display: block;
+  font-size: 1.2rem;
+  max-width: none;
+  white-space: normal;
+  text-overflow: unset;
+  overflow: visible;
+}
+#page-menu .item-ingredients {
+  color: rgba(255,255,255,0.72);
+  font-size: 0.67rem;
+  font-style: italic;
+  display: block;
+  margin-top: 0.1rem;
+  text-transform: none;
+}
+#page-menu .menu-item--cocktail .item-price {
+  margin-left: auto;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+/* Spirits grid */
+#page-menu .spirits-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem 3rem;
+}
+#page-menu .spirits-cat-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 3px;
+  color: var(--vice-pink);
+  background: white;
+  border-radius: 30px;
+  border: none;
+  border-left: none;
+  padding: 0.18rem 1.2rem;
+  display: inline-block;
+  margin-bottom: 0.55rem;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  #page-menu .menu-grid,
+  #page-menu .spirits-grid {
+    grid-template-columns: 1fr;
+  }
+  #page-menu .section-title {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    letter-spacing: 3px;
+  }
+  #page-menu .menu-sections {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .menu-drip-bar svg {
+    max-height: 55px;
+  }
+}
+
+/* ═══════════════════════════════════════
    HERO
 ═══════════════════════════════════════ */
 .hero {
@@ -981,10 +1227,9 @@ body {
 /* ═══════════════════════════════════════
    GAME
 ═══════════════════════════════════════ */
-/* Game page: letterbox the canvas to fill all available space */
 #page-game .game-wrap {
   max-width: none;
-  height: calc(100dvh - 86px);
+  height: 100%;
   margin: 0;
   padding: 0;
   display: flex;
@@ -996,9 +1241,9 @@ body {
 #gameCanvas {
   display: block;
   aspect-ratio: 2752 / 1120;
-  /* Fill available space: width-constrained OR height-constrained, whichever is smaller */
-  width: min(100%, calc((100dvh - 86px) * 2752 / 1120));
-  height: auto;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
   border: 2px solid #E8215A;
   box-shadow: 0 0 24px rgba(232, 33, 90, 0.35);
   cursor: pointer;
@@ -1007,46 +1252,36 @@ body {
 
 .game-hint { display: none; }
 
-/* ─── Mobile landscape: header + game + footer all fit in one viewport ─── */
+/* ─── Game page: lock entire page to viewport so footer is always visible ─── */
+body:has(#page-game.active) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: unset;
+  overflow: hidden;
+}
+
+body:has(#page-game.active) .site-stripe,
+body:has(#page-game.active) .nav,
+body:has(#page-game.active) .site-footer {
+  flex-shrink: 0;
+}
+
+body:has(#page-game.active) .nav {
+  position: relative;
+  top: auto;
+}
+
+body:has(#page-game.active) #page-game {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/* ─── Mobile landscape: compress footer into a slim horizontal strip ─── */
 @media (orientation: landscape) and (max-height: 500px) {
-  /* Reclaim the ~28 px top stripe */
-  .site-stripe { display: none; }
+  body:has(#page-game.active) .site-stripe { display: none; }
 
-  /* Only activate the locked-column layout on the game tab */
-  body:has(#page-game.active) {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    min-height: unset;
-    overflow: hidden;
-  }
-
-  body:has(#page-game.active) .nav {
-    flex-shrink: 0;
-    position: relative; /* disable sticky so flex height is exact */
-    top: auto;
-  }
-
-  body:has(#page-game.active) #page-game {
-    flex: 1 1 0;
-    min-height: 0;
-  }
-
-  /* Override the fixed calc() height — let flex drive it */
-  body:has(#page-game.active) #page-game .game-wrap {
-    height: 100%;
-  }
-
-  /* Canvas: height-driven sizing; max-width prevents horizontal overflow */
-  body:has(#page-game.active) #gameCanvas {
-    width: auto;
-    height: 100%;
-    max-width: 100%;
-  }
-
-  /* Compact footer: horizontal strip instead of stacked column */
   body:has(#page-game.active) .site-footer {
-    flex-shrink: 0;
     padding: 5px 1rem;
     display: flex;
     flex-direction: row;
@@ -1054,19 +1289,8 @@ body {
     justify-content: space-between;
   }
 
-  body:has(#page-game.active) .footer-graffiti {
-    max-width: 110px;
-    margin: 0;
-  }
-
-  body:has(#page-game.active) .footer-socials {
-    margin-top: 0;
-    gap: 0.5rem;
-  }
-
-  body:has(#page-game.active) .footer-social-icon {
-    width: 28px;
-    height: 28px;
-  }
+  body:has(#page-game.active) .footer-graffiti { max-width: 110px; margin: 0; }
+  body:has(#page-game.active) .footer-socials { margin-top: 0; gap: 0.5rem; }
+  body:has(#page-game.active) .footer-social-icon { width: 28px; height: 28px; }
 }
 
