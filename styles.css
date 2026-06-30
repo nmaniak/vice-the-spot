@@ -990,7 +990,8 @@ body {
 #gameCanvas {
   display: block;
   width: 100%;
-  height: 240px;
+  height: auto;
+  aspect-ratio: 820 / 240;
   border-radius: 12px;
   border: 2px solid #E8215A;
   box-shadow: 0 0 24px rgba(232, 33, 90, 0.35);
@@ -1009,4 +1010,6 @@ body {
 
 @media (max-width: 768px) {
   .game-hint { display: none; }
+  #page-game .game-wrap { padding: 0; }
+  #gameCanvas { border-radius: 0; border-left: none; border-right: none; }
 }
