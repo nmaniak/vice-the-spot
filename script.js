@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fill();
     if (skaterReady) {
       // SVG viewBox 0 0 60 82; wheel bottom at y=82 aligns with P.y
-      const sh = Math.round(H * 0.36), sw = Math.round(sh * 64 / 88);
+      const sh = Math.round(H * 0.22), sw = Math.round(sh * 64 / 88);
       // slight tilt when airborne
       if (!P.grounded) {
         ctx.translate(px, py);

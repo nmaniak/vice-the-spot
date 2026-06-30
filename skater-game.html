@@ -110,7 +110,7 @@
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath(); ctx.ellipse(px, GROUND + 4, 26, 5, 0, 0, Math.PI * 2); ctx.fill();
     if (skaterReady) {
-      const sh = Math.round(H * 0.36), sw = Math.round(sh * 64 / 88);
+      const sh = Math.round(H * 0.22), sw = Math.round(sh * 64 / 88);
       if (!P.grounded) {
         ctx.translate(px, py); ctx.rotate(-0.15);
         ctx.drawImage(skaterImg, -sw / 2, -sh, sw, sh);
