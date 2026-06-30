@@ -1013,3 +1013,7 @@ body {
   #page-game .game-wrap { padding: 0; }
   #gameCanvas { border-radius: 0; border-left: none; border-right: none; }
 }
+
+@media (max-width: 768px) and (orientation: portrait) {
+  #gameCanvas { aspect-ratio: 3 / 2; }
+}
