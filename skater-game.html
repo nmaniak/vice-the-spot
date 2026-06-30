@@ -54,6 +54,8 @@
   let bgImg = null, bgReady = false;
   let skaterImg = null, skaterReady = false;
   let copImg = null, copReady = false;
+  let donutDangerImg = null, donutDangerReady = false;
+  let donutSafeImg = null, donutSafeReady = false;
 
   const P = { x: 90, y: 0, w: 34, h: 54, vy: 0, grounded: true, frameTimer: 0 };
 
@@ -65,6 +67,10 @@
     skaterImg.src = 'assets/images/skater.svg';
     copImg = new Image(); copImg.onload = function () { copReady = true; };
     copImg.src = 'assets/images/cop-pig.svg';
+    donutDangerImg = new Image(); donutDangerImg.onload = function () { donutDangerReady = true; };
+    donutDangerImg.src = 'assets/images/donut-danger.svg';
+    donutSafeImg = new Image(); donutSafeImg.onload = function () { donutSafeReady = true; };
+    donutSafeImg.src = 'assets/images/donut-safe.svg';
   })();
 
   /* ---- resize ---- */
@@ -72,6 +78,7 @@
     W = canvas.width  = canvas.offsetWidth  || 800;
     H = canvas.height = canvas.offsetHeight || 500;
     GROUND = H - Math.round(H * 0.14);
+    P.x = Math.max(60, Math.round(W * 0.115));
     if (gameState !== 'playing') P.y = GROUND;
   }
 
@@ -129,18 +136,19 @@
   }
 
   function drawShot(s) {
-    ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rot);
-    ctx.fillStyle = '#c87941'; ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(10,10,20,0.85)'; ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = s.safe ? '#ffd700' : '#ff88aa';
-    ctx.beginPath(); ctx.arc(0, 0, s.r * 0.78, Math.PI + 0.3, -0.3); ctx.arc(0, 0, s.r * 0.55, -0.3, Math.PI + 0.3, true); ctx.closePath(); ctx.fill();
-    if (s.safe) {
-      ctx.fillStyle = '#fff';    ctx.fillRect(-5, -s.r * 0.55, 3, 2);
-      ctx.fillStyle = '#ff3377'; ctx.fillRect(2,   s.r * 0.35, 3, 2);
+    const img = s.safe ? donutSafeImg : donutDangerImg;
+    const ready = s.safe ? donutSafeReady : donutDangerReady;
+    const d = s.r * 2.1;
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rot);
+    if (ready) {
+      ctx.drawImage(img, -d / 2, -d / 2, d, d);
     } else {
-      ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
-      ctx.fillStyle = '#ffee00'; ctx.fillRect(2,   s.r * 0.4, 3, 2);
-      ctx.fillStyle = '#fff';    ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+      ctx.fillStyle = '#c87941';
+      ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(10,10,20,0.85)';
+      ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
   }
@@ -165,9 +173,10 @@
 
   /* ---- collision ---- */
   function hitsPlayer(x, y, r) {
-    const hw = P.w * 0.42, hh = P.h * 0.70;
-    const cx = P.x, cy = P.y - hh / 2;
-    const nearX = Math.max(cx - hw, Math.min(x, cx + hw));
+    const hh = Math.round(50 * (H / 260));
+    const hw = Math.round(14 * (H / 260));
+    const cy = P.y - hh / 2;
+    const nearX = Math.max(P.x - hw, Math.min(x, P.x + hw));
     const nearY = Math.max(cy - hh / 2, Math.min(y, cy + hh / 2));
     return Math.hypot(x - nearX, y - nearY) < r;
   }
@@ -179,9 +188,9 @@
     ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.fillRect(0, 0, W, fs * 2.8);
     ctx.fillStyle = '#fff'; ctx.textAlign = 'right';
     ctx.font = `bold ${fs}px "Arial Black",sans-serif`;
-    ctx.fillText(String(score).padStart(5,'0'), W - Math.round(W * 0.11), 8);
+    ctx.fillText(String(score).padStart(5,'0'), W - 10, 8);
     ctx.fillStyle = '#ffee00'; ctx.font = `bold ${Math.round(fs * 0.75)}px "Arial Black",sans-serif`;
-    ctx.fillText('HI ' + String(hiScore).padStart(5,'0'), W - Math.round(W * 0.11), fs + 10);
+    ctx.fillText('HI ' + String(hiScore).padStart(5,'0'), W - 10, fs + 10);
     ctx.fillStyle = '#00ffcc'; ctx.font = `bold ${Math.round(fs * 0.8)}px "Arial Black",sans-serif`;
     ctx.textAlign = 'left'; ctx.fillText('LVL ' + level, 12, 8);
     ctx.restore();

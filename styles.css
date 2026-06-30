@@ -1008,15 +1008,5 @@ body {
 }
 
 @media (max-width: 768px) {
-  #page-game .game-wrap {
-    margin: 0;
-    padding: 0;
-  }
   .game-hint { display: none; }
-  #gameCanvas {
-    height: calc(100dvh - 90px);
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
 }

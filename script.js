@@ -81,6 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let bgImg = null, bgReady = false;
   let skaterImg = null, skaterReady = false;
   let copImg = null, copReady = false;
+  let donutDangerImg = null, donutDangerReady = false;
+  let donutSafeImg = null, donutSafeReady = false;
 
   let copShooting = 0;
 
@@ -105,6 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
       copImg = new Image();
       copImg.onload = function () { copReady = true; };
       copImg.src = 'assets/images/cop-pig.svg';
+    }
+    if (!donutDangerImg) {
+      donutDangerImg = new Image();
+      donutDangerImg.onload = function () { donutDangerReady = true; };
+      donutDangerImg.src = 'assets/images/donut-danger.svg';
+    }
+    if (!donutSafeImg) {
+      donutSafeImg = new Image();
+      donutSafeImg.onload = function () { donutSafeReady = true; };
+      donutSafeImg.src = 'assets/images/donut-safe.svg';
     }
   }
 
@@ -148,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.fill();
     if (skaterReady) {
       // SVG viewBox 0 0 60 82; wheel bottom at y=82 aligns with P.y
-      const sw = 64, sh = 88;
+      const sh = Math.round(H * 0.36), sw = Math.round(sh * 64 / 88);
       // slight tilt when airborne
       if (!P.grounded) {
         ctx.translate(px, py);
@@ -165,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawCopPig() {
     // SVG viewBox 0 0 80 120; boot bottom at y=117, align to groundY
     // body center in SVG at x=48, align to W-70 on screen
-    const cx = W - 70, cy = groundY;
-    const sw = 90, sh = 135;
+    const cx = W - Math.max(50, Math.round(W * 0.09)), cy = groundY;
+    const sh = Math.round(H * 0.56), sw = Math.round(sh * 90 / 135);
     const drawX = cx - 48 * (sw / 80);
     const drawY = cy - 117 * (sh / 120);
 
@@ -191,10 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const h = SHOT_HEIGHTS[Math.floor(Math.random() * SHOT_HEIGHTS.length)];
     const safe = h >= 70;
     shots.push({
-      x: W - 90,
-      y: groundY - h,
+      x: W - Math.max(60, Math.round(W * 0.115)),
+      y: groundY - Math.round(h * (H / 260)),
       vx: -spd,
-      r: 12,
+      r: Math.round(12 * (H / 260)),
       rot: 0,
       rotSpd: (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 5),
       scored: false,
@@ -204,34 +216,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function drawShot(s) {
+    const img = s.safe ? donutSafeImg : donutDangerImg;
+    const ready = s.safe ? donutSafeReady : donutDangerReady;
+    const d = s.r * 2.1;
     ctx.save();
     ctx.translate(s.x, s.y);
     ctx.rotate(s.rot);
-    ctx.fillStyle = '#c87941';
-    ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = 'rgba(10,10,20,0.85)';
-    ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
-    // safe donuts get gold icing; dangerous ones get pink
-    ctx.fillStyle = s.safe ? '#ffd700' : '#ff88aa';
-    ctx.beginPath(); ctx.arc(0, 0, s.r * 0.78, Math.PI + 0.3, -0.3); ctx.arc(0, 0, s.r * 0.55, -0.3, Math.PI + 0.3, true); ctx.closePath(); ctx.fill();
-    if (s.safe) {
-      ctx.fillStyle = '#fff';    ctx.fillRect(-5, -s.r * 0.55, 3, 2);
-      ctx.fillStyle = '#ff3377'; ctx.fillRect(2,   s.r * 0.35, 3, 2);
+    if (ready) {
+      ctx.drawImage(img, -d / 2, -d / 2, d, d);
     } else {
-      ctx.fillStyle = '#00ffcc'; ctx.fillRect(-5, -s.r * 0.6, 3, 2);
-      ctx.fillStyle = '#ffee00'; ctx.fillRect(2,   s.r * 0.4, 3, 2);
-      ctx.fillStyle = '#fff';    ctx.fillRect(-2, -s.r * 0.3, 3, 2);
+      ctx.fillStyle = '#c87941';
+      ctx.beginPath(); ctx.arc(0, 0, s.r, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(10,10,20,0.85)';
+      ctx.beginPath(); ctx.arc(0, 0, s.r * 0.38, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
   }
 
   /* ---- collision ---- */
   function hitsPlayer(x, y, r) {
-    const hw = P.w * 0.42, hh = P.h * 0.70;
-    const cx = P.x, cy = P.y - hh / 2;
+    const hh = Math.round(50 * (H / 260));
+    const hw = Math.round(14 * (H / 260));
+    const cy = P.y - hh / 2;
     // circle vs AABB
-    const nearX = Math.max(cx - hw, Math.min(x, cx + hw));
-    const nearY = Math.max(cy - hh/2, Math.min(y, cy + hh/2));
+    const nearX = Math.max(P.x - hw, Math.min(x, P.x + hw));
+    const nearY = Math.max(cy - hh / 2, Math.min(y, cy + hh / 2));
     return Math.hypot(x - nearX, y - nearY) < r;
   }
 
@@ -275,11 +284,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ctx.fillStyle = '#fff'; ctx.textAlign = 'right';
     ctx.font = 'bold 18px "Bebas Neue",sans-serif';
-    ctx.fillText(String(score).padStart(5,'0'), W - 85, 8);
+    ctx.fillText(String(score).padStart(5,'0'), W - 10, 8);
     ctx.font = '10px Arial'; ctx.fillStyle = '#bbb';
-    ctx.fillText('SCORE', W - 85, 28);
+    ctx.fillText('SCORE', W - 10, 28);
     ctx.fillStyle = '#ffee00'; ctx.font = 'bold 13px "Bebas Neue",sans-serif';
-    ctx.fillText('HI ' + String(hiScore).padStart(5,'0'), W - 85, 40);
+    ctx.fillText('HI ' + String(hiScore).padStart(5,'0'), W - 10, 40);
 
     ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 14px "Bebas Neue",sans-serif';
     ctx.textAlign = 'left';
@@ -330,7 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const rect = canvas.getBoundingClientRect();
     W = canvas.width  = rect.width  || canvas.offsetWidth  || 780;
     H = canvas.height = rect.height || canvas.offsetHeight || 240;
-    groundY = H - 40;
+    groundY = H - Math.max(30, Math.round(H * 0.15));
+    P.x = Math.max(60, Math.round(W * 0.115));
     if (gameState !== 'playing') P.y = groundY;
   }
 
