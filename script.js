@@ -81,14 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
     'assets/images/skater_run_4.png',
   ];
   const SKATER_JUMP_SRCS = ['assets/images/skater_jump.png'];
-  const COP_SRCS         = [
-    'assets/images/cop_idle_1.png',
-    'assets/images/cop_idle_2.png',
-    'assets/images/cop_idle_3.png',
-  ];
   const SKATER_RUN_FPS  = 10;   // frames/sec while running
   const SKATER_JUMP_FPS =  4;   // frames/sec while airborne
-  const COP_FPS         =  5;   // frames/sec for cop idle loop
 
   let canvas, ctx;
   let W, H, groundY;
@@ -101,20 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let groundOff = 0;
   let bgImg = null, bgReady = false;
   let skaterImg = null, skaterReady = false;
-  let copImg = null, copReady = false;
   let donutDangerImg = null, donutDangerReady = false;
   let donutSafeImg = null, donutSafeReady = false;
 
   // PNG sprite frame arrays (primary) — SVGs above remain as fallback
   let skaterRunFrames  = [], skaterRunReady  = false;
   let skaterJumpFrames = [], skaterJumpReady = false;
-  let copPigFrames     = [], copPigReady     = false;
 
-  // Animation timers and current frame indices
   let skaterAnimTimer = 0, skaterAnimFrame = 0;
-  let copAnimTimer    = 0, copAnimFrame    = 0;
-
-  let copShooting = 0;
 
   const P = {
     x: 90, y: 0, w: 34, h: 54,
@@ -152,11 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
       skaterImg.onload = function () { skaterReady = true; };
       skaterImg.src = 'assets/images/skater.svg';
     }
-    if (!copImg) {
-      copImg = new Image();
-      copImg.onload = function () { copReady = true; };
-      copImg.src = 'assets/images/cop-pig.svg';
-    }
     // PNG sprite frames — take priority over SVGs once at least one frame loads
     if (!skaterRunFrames.length) {
       skaterRunFrames = loadFrameArray(SKATER_RUN_SRCS, function (frames) {
@@ -166,11 +149,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!skaterJumpFrames.length) {
       skaterJumpFrames = loadFrameArray(SKATER_JUMP_SRCS, function (frames) {
         skaterJumpReady = frames.some(function (f) { return f.naturalWidth > 0; });
-      });
-    }
-    if (!copPigFrames.length) {
-      copPigFrames = loadFrameArray(COP_SRCS, function (frames) {
-        copPigReady = frames.some(function (f) { return f.naturalWidth > 0; });
       });
     }
     if (!donutDangerImg) {
@@ -245,25 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  /* ---- villain ---- */
-  function drawCopPig() {
-    const cx = W - Math.max(50, Math.round(W * 0.09)), cy = groundY;
-    const sh = Math.round(H * 0.22), sw = Math.round(sh * 90 / 135);
-    const drawX = cx - 48 * (sw / 80);
-    const drawY = cy - 117 * (sh / 120);
-
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath(); ctx.ellipse(cx + 5, cy + 4, sw * 0.42, 5, 0, 0, Math.PI * 2); ctx.fill();
-
-    const img = pickFrame(copPigFrames, copPigReady, copImg, copReady, copAnimFrame);
-    if (img) {
-      const bounceY = copShooting > 0 ? -4 : 0;
-      ctx.drawImage(img, drawX, drawY + bounceY, sw, sh);
-    }
-    ctx.restore();
-  }
-
   /* ---- donuts at varied heights ---- */
   // safe=true → donut flies above standing skater (gold icing — don't jump!)
   const SHOT_HEIGHTS = [0, 28, 50, 75];  // 75 clears the standing player's head
@@ -281,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
       scored: false,
       safe,
     });
-    copShooting = 0.25;
   }
 
   function drawShot(s) {
@@ -398,7 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
     score = 0; level = 1; spd = BASE_SPD; elapsed = 0;
     levelTimer = 0; shootTimer = 0;
     shots = []; particles = [];
-    copShooting = 0;
     skaterAnimTimer = 0; skaterAnimFrame = 0;
     P.y = groundY; P.vy = 0; P.grounded = true; P.frameTimer = 0;
     hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
@@ -431,8 +388,6 @@ document.addEventListener('DOMContentLoaded', () => {
       elapsed    += dt;
       levelTimer += dt;
       shootTimer += dt;
-
-      if (copShooting > 0) copShooting -= dt;
 
       // player physics
       P.vy += GRAV * dt; P.y += P.vy * dt; P.frameTimer += dt;
@@ -476,17 +431,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // cop pig animates continuously (always visible)
-    copAnimTimer += dt;
-    if (copAnimTimer >= 1 / COP_FPS) {
-      copAnimTimer -= 1 / COP_FPS;
-      copAnimFrame++;
-    }
-
     for (const s of shots) drawShot(s);
     drawParticles();
     if (gameState !== 'dead' || particles.length > 0) drawPlayer();
-    drawCopPig();
     drawHUD();
     if (gameState === 'idle') drawIdle();
     if (gameState === 'dead') drawDead();

@@ -1007,3 +1007,66 @@ body {
 
 .game-hint { display: none; }
 
+/* ─── Mobile landscape: header + game + footer all fit in one viewport ─── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Reclaim the ~28 px top stripe */
+  .site-stripe { display: none; }
+
+  /* Only activate the locked-column layout on the game tab */
+  body:has(#page-game.active) {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: unset;
+    overflow: hidden;
+  }
+
+  body:has(#page-game.active) .nav {
+    flex-shrink: 0;
+    position: relative; /* disable sticky so flex height is exact */
+    top: auto;
+  }
+
+  body:has(#page-game.active) #page-game {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* Override the fixed calc() height — let flex drive it */
+  body:has(#page-game.active) #page-game .game-wrap {
+    height: 100%;
+  }
+
+  /* Canvas: height-driven sizing; max-width prevents horizontal overflow */
+  body:has(#page-game.active) #gameCanvas {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+
+  /* Compact footer: horizontal strip instead of stacked column */
+  body:has(#page-game.active) .site-footer {
+    flex-shrink: 0;
+    padding: 5px 1rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  body:has(#page-game.active) .footer-graffiti {
+    max-width: 110px;
+    margin: 0;
+  }
+
+  body:has(#page-game.active) .footer-socials {
+    margin-top: 0;
+    gap: 0.5rem;
+  }
+
+  body:has(#page-game.active) .footer-social-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
+
