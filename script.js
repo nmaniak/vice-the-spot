@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const vy      = rolling ? 0 : -80 - Math.random() * 60;
     shots.push({
       x: cx - 20, y: startY,
-      vx: -(spd + 80 + Math.random() * 40),
+      vx: -spd,
       vy: vy,
       r: 11,
       rot: 0, rotSpd: (Math.random() - 0.5) * 10,
