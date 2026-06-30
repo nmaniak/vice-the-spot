@@ -51,9 +51,29 @@ body {
   min-height: 100vh;
 }
 
-/* ═══════════════════════════════════════
+/* =======================================
+   SITE STRIPE
+======================================= */
+.site-stripe {
+  background: var(--vice-pink);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 1rem;
+  line-height: 1;
+}
+
+.site-stripe-left,
+.site-stripe-right {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.18em;
+  color: #fff;
+}
+
+/* =======================================
    NAV
-═══════════════════════════════════════ */
+======================================= */
 .nav {
   position: sticky;
   top: 0;

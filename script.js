@@ -373,14 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- overlays ---- */
   function drawIdle() {
     ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.68)'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0, 0, W, H);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#ff3377'; ctx.font = 'bold 36px "Bebas Neue",sans-serif';
-    ctx.fillText('SKATER VS COP PIG', W/2, H/2 - 42);
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px "Bebas Neue",sans-serif';
-    ctx.fillText('TAP OR PRESS SPACE TO START', W/2, H/2 + 2);
-    ctx.fillStyle = '#aaa'; ctx.font = '13px Arial';
-    ctx.fillText('Jump over cones and dodge the pig\'s donuts', W/2, H/2 + 26);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Bebas Neue",sans-serif';
+    ctx.fillText('TAP OR PRESS SPACE TO START', W/2, H/2);
     ctx.restore();
   }
 
