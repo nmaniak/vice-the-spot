@@ -1,6 +1,6 @@
-/* ═══════════════════════════════════════
+/* =======================================
    PAGE SWITCHING
-═══════════════════════════════════════ */
+======================================= */
 function switchPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => {
@@ -17,9 +17,9 @@ function switchPage(pageId) {
   if (pageId === 'game' && typeof initGame === 'function') initGame();
 }
 
-/* ═══════════════════════════════════════
+/* =======================================
    MENU FILTER
-═══════════════════════════════════════ */
+======================================= */
 function filterMenu(btn) {
   const filter = btn.dataset.filter;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -29,9 +29,9 @@ function filterMenu(btn) {
   });
 }
 
-/* ═══════════════════════════════════════
-   INTERSECTION OBSERVER — fade-in on scroll
-═══════════════════════════════════════ */
+/* =======================================
+   INTERSECTION OBSERVER - fade-in on scroll
+======================================= */
 document.addEventListener('DOMContentLoaded', () => {
   const style = document.createElement('style');
   style.textContent = `
@@ -53,403 +53,478 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-/* ═══════════════════════════════════════
-   COCKTAIL BLAST - GAME
-═══════════════════════════════════════ */
+/* =======================================
+   SKATER VS COP PIG - GAME
+======================================= */
 (function () {
   'use strict';
 
-  const SPEED_UP_EVERY = 15;   // seconds between each speed increase
-  const BASE_SPEED     = 220;  // px/s starting speed
-  const SPEED_STEP     = 70;   // px/s added per level
+  const BASE_SPD    = 260;
+  const SPD_STEP    = 40;
+  const LEVEL_EVERY = 12;
+  const GRAV        = 1600;
+  const JUMP_V      = -620;
 
   let canvas, ctx;
-  let gameState = 'idle'; // 'idle' | 'playing' | 'over'
+  let W, H, groundY;
+  let gameState = 'idle';
   let score = 0, hiScore = 0;
-  let gameTime = 0, bestTime = 0; // seconds survived
-  let balls = [], particles = [];
-  let rafId = null, lastTs = 0;
-  let spawnAccum = 0, timerHandle = null;
-  const SPAWN_GAP = 1400; // ms — constant throughout
-  let ballSpd = BASE_SPEED;
-  let speedLevel = 0;
-  let pendingSpeedUp = false; // waiting for screen to clear before bumping speed
-  let speedUpFlash = 0;       // seconds remaining on "SPEED UP!" banner
-  let groundY = 200;
+  let level = 1, spd = BASE_SPD, elapsed = 0;
+  let spawnTimer = 0, levelTimer = 0;
+  let obstacles = [], particles = [];
+  let rafId = null, lastTs = null;
+
+  // parallax offsets
+  let skyOff = 0, midOff = 0, groundOff = 0;
+  let skyBuildings = [], midBuildings = [];
 
   const P = {
-    x: 90, y: 0, w: 34, h: 50,
-    vy: 0, grounded: true,
-    JUMP: -580, GRAV: 1300,
-    legFrame: 0, legTimer: 0,
-    dead: false
+    x: 90, y: 0, w: 34, h: 54,
+    vy: 0, grounded: true, frameTimer: 0,
   };
 
-  function pTop() { return groundY - P.h; }
+  /* ---- background init ---- */
+  function initBg() {
+    skyBuildings = []; midBuildings = [];
+    let x = 0;
+    while (x < W + 300) {
+      const bw = 40 + Math.random() * 80;
+      skyBuildings.push({ ox: x, w: bw, h: 60 + Math.random() * 100,
+        col: `hsl(${220 + Math.random()*40},${20+Math.random()*20}%,${14+Math.random()*10}%)`,
+        win: Math.random() > 0.3 });
+      x += bw + 2 + Math.random() * 20;
+    }
+    x = 0;
+    while (x < W + 300) {
+      const bw = 30 + Math.random() * 60;
+      midBuildings.push({ ox: x, w: bw, h: 30 + Math.random() * 60,
+        col: `hsl(${210+Math.random()*30},${15+Math.random()*15}%,${20+Math.random()*10}%)` });
+      x += bw + 1 + Math.random() * 10;
+    }
+    skyOff = midOff = groundOff = 0;
+  }
 
+  function drawBuildings(list, offset, yBase, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha;
+    const span = W + 400;
+    for (const b of list) {
+      const x = ((b.ox + offset) % span + span) % span - 200;
+      ctx.fillStyle = b.col;
+      ctx.fillRect(x, yBase - b.h, b.w, b.h);
+      if (b.win) {
+        ctx.fillStyle = 'rgba(255,220,80,0.22)';
+        for (let wy = yBase - b.h + 6; wy < yBase - 8; wy += 14)
+          for (let wx = x + 5; wx < x + b.w - 8; wx += 12)
+            if (Math.random() > 0.4) ctx.fillRect(wx, wy, 6, 8);
+      }
+    }
+    ctx.restore();
+  }
+
+  function drawGround() {
+    ctx.fillStyle = '#2d2d3a';
+    ctx.fillRect(0, groundY, W, H - groundY);
+    ctx.strokeStyle = '#ffee00aa';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([24, 18]);
+    ctx.lineDashOffset = groundOff % 42;
+    ctx.beginPath();
+    ctx.moveTo(0, groundY + (H - groundY) / 2);
+    ctx.lineTo(W, groundY + (H - groundY) / 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#ff337788';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(W, groundY); ctx.stroke();
+  }
+
+  /* ---- player ---- */
+  function drawPlayer() {
+    const px = P.x, py = P.y;
+    ctx.save();
+
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.beginPath();
+    ctx.ellipse(px, groundY + 4, 20, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // board
+    ctx.fillStyle = '#cc2255';
+    const boardY = py + 2;
+    ctx.beginPath();
+    ctx.roundRect(px - 22, boardY, 44, 7, 3);
+    ctx.fill();
+    ctx.fillStyle = '#333';
+    ctx.beginPath();
+    ctx.arc(px - 14, boardY + 7, 5, 0, Math.PI * 2);
+    ctx.arc(px + 14, boardY + 7, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff3377';
+    ctx.beginPath();
+    ctx.arc(px - 14, boardY + 7, 3, 0, Math.PI * 2);
+    ctx.arc(px + 14, boardY + 7, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    const top = py - P.h;
+    // body
+    ctx.fillStyle = '#e8215a';
+    ctx.beginPath(); ctx.roundRect(px - 11, top + 18, 22, 26, 4); ctx.fill();
+    // hood
+    ctx.fillStyle = '#c41a4a';
+    ctx.beginPath(); ctx.arc(px, top + 18, 12, Math.PI, 0); ctx.fill();
+    // head
+    ctx.fillStyle = '#f4c48e';
+    ctx.beginPath(); ctx.arc(px, top + 13, 11, 0, Math.PI * 2); ctx.fill();
+    // eyes
+    ctx.fillStyle = '#222';
+    ctx.beginPath();
+    ctx.arc(px - 4, top + 12, 2, 0, Math.PI * 2);
+    ctx.arc(px + 4, top + 12, 2, 0, Math.PI * 2);
+    ctx.fill();
+    // legs
+    const kick = P.grounded ? Math.sin(P.frameTimer * 8) * 6 : 0;
+    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(px - 4, top + 44); ctx.lineTo(px - 8 + kick, boardY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(px + 4, top + 44); ctx.lineTo(px + 8 - kick, boardY); ctx.stroke();
+
+    ctx.restore();
+  }
+
+  /* ---- cop pig ---- */
+  function drawCopPig() {
+    const cx = W - 70, cy = groundY;
+    ctx.save();
+
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(cx, cy + 4, 24, 6, 0, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#4a90d9';
+    ctx.beginPath(); ctx.roundRect(cx - 18, cy - 60, 36, 40, 6); ctx.fill();
+
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.arc(cx - 4, cy - 45, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#b8860b'; ctx.font = 'bold 5px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('PIG', cx - 4, cy - 43);
+
+    ctx.fillStyle = '#2a60a0';
+    ctx.fillRect(cx - 14, cy - 24, 10, 24);
+    ctx.fillRect(cx + 4, cy - 24, 10, 24);
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(cx - 15, cy - 3, 12, 7);
+    ctx.fillRect(cx + 3, cy - 3, 12, 7);
+
+    ctx.fillStyle = '#ffaacc';
+    ctx.beginPath(); ctx.arc(cx, cy - 72, 18, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#2a60a0';
+    ctx.fillRect(cx - 20, cy - 92, 40, 6);
+    ctx.fillRect(cx - 14, cy - 108, 28, 20);
+    ctx.fillStyle = '#ffd700';
+    ctx.beginPath(); ctx.arc(cx, cy - 100, 4, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#ff99bb';
+    ctx.beginPath(); ctx.ellipse(cx, cy - 69, 10, 7, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#cc5577';
+    ctx.beginPath();
+    ctx.arc(cx - 4, cy - 69, 2.5, 0, Math.PI * 2);
+    ctx.arc(cx + 4, cy - 69, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(cx - 7, cy - 76, 5, 0, Math.PI * 2);
+    ctx.arc(cx + 7, cy - 76, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(cx - 7, cy - 75, 2.5, 0, Math.PI * 2);
+    ctx.arc(cx + 7, cy - 75, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 12, cy - 83); ctx.lineTo(cx - 3, cy - 80);
+    ctx.moveTo(cx + 12, cy - 83); ctx.lineTo(cx + 3, cy - 80);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 8; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(cx - 18, cy - 52); ctx.lineTo(cx - 40, cy - 64); ctx.stroke();
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.moveTo(cx - 40, cy - 66); ctx.lineTo(cx - 55, cy - 80); ctx.stroke();
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.arc(cx - 40, cy - 66, 4, 0, Math.PI * 2); ctx.fill();
+
+    ctx.restore();
+  }
+
+  /* ---- obstacles ---- */
+  function spawnObstacle() {
+    const types = ['cone', 'cone', 'trash', 'donut', 'pothole', 'board'];
+    const type  = types[Math.floor(Math.random() * types.length)];
+    let oh = 36, ow = 24;
+    if (type === 'pothole') { oh = 10; ow = 50; }
+    if (type === 'cone')    { oh = 38; ow = 22; }
+    if (type === 'trash')   { oh = 44; ow = 26; }
+    if (type === 'donut')   { oh = 24; ow = 24; }
+    if (type === 'board')   { oh = 14; ow = 44; }
+    obstacles.push({ type, x: W + 40, y: groundY, w: ow, h: oh,
+      spd: spd + (Math.random() - 0.5) * 20, scored: false });
+  }
+
+  function drawObstacle(o) {
+    const x = o.x, y = o.y;
+    ctx.save();
+    if (o.type === 'pothole') {
+      ctx.fillStyle = '#111118';
+      ctx.beginPath(); ctx.ellipse(x, y - 5, o.w / 2, o.h / 2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#444'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    if (o.type === 'cone') {
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath(); ctx.moveTo(x, y - o.h); ctx.lineTo(x - o.w/2, y); ctx.lineTo(x + o.w/2, y); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = 'white'; ctx.fillRect(x - o.w/2 + 2, y - 20, o.w - 4, 5);
+    }
+    if (o.type === 'trash') {
+      ctx.fillStyle = '#556b2f'; ctx.fillRect(x - o.w/2, y - o.h, o.w, o.h);
+      ctx.fillStyle = '#3a5020'; ctx.fillRect(x - o.w/2, y - o.h, o.w, 8);
+      ctx.strokeStyle = '#222'; ctx.lineWidth = 1.5;
+      for (let i = 1; i < 3; i++) {
+        ctx.beginPath(); ctx.moveTo(x - o.w/2, y - o.h + 8 + i*10); ctx.lineTo(x + o.w/2, y - o.h + 8 + i*10); ctx.stroke();
+      }
+    }
+    if (o.type === 'donut') {
+      ctx.fillStyle = '#c87941';
+      ctx.beginPath(); ctx.arc(x, y - o.h/2, o.w/2, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1a1a2e';
+      ctx.beginPath(); ctx.arc(x, y - o.h/2, o.w/5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff88aa'; ctx.fillRect(x - 7, y - o.h/2 - 2, 14, 3);
+      ctx.fillStyle = '#00ffcc'; ctx.fillRect(x - 5, y - o.h/2 - 6, 4, 2);
+      ctx.fillStyle = '#ffee00'; ctx.fillRect(x + 2, y - o.h/2 + 4, 4, 2);
+    }
+    if (o.type === 'board') {
+      ctx.fillStyle = '#8B4513';
+      ctx.beginPath(); ctx.roundRect(x - o.w/2, y - o.h, o.w, o.h - 4, 3); ctx.fill();
+      ctx.fillStyle = '#333';
+      ctx.beginPath();
+      ctx.arc(x - 14, y - 4, 4, 0, Math.PI * 2);
+      ctx.arc(x + 14, y - 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  /* ---- collision ---- */
+  function collides(o) {
+    const px = P.x, py = P.y, ph = P.h;
+    const pw = P.w * 0.55, phh = ph * 0.75;
+    if (o.type === 'pothole') {
+      return py >= groundY - 2 && px + pw/2 > o.x - o.w/2 && px - pw/2 < o.x + o.w/2;
+    }
+    const or = Math.min(o.w, o.h) / 2;
+    return Math.hypot(o.x - px, (o.y - o.h/2) - (py - phh/2)) < or + Math.min(pw, phh) / 2;
+  }
+
+  /* ---- particles ---- */
+  function burst() {
+    for (let i = 0; i < 18; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 80 + Math.random() * 220;
+      particles.push({
+        x: P.x, y: P.y - P.h / 2,
+        vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+        life: 1, r: 3 + Math.random() * 6,
+        col: ['#ff3377','#ffee00','#00ffcc','#ff6600'][Math.floor(Math.random() * 4)],
+      });
+    }
+  }
+
+  function updateParticles(dt) {
+    for (const p of particles) {
+      p.x += p.vx * dt; p.y += p.vy * dt;
+      p.vy += 400 * dt; p.life -= dt * 1.8;
+    }
+    particles = particles.filter(p => p.life > 0);
+  }
+
+  function drawParticles() {
+    for (const p of particles) {
+      ctx.save(); ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.col;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  /* ---- HUD ---- */
+  function drawHUD() {
+    ctx.save();
+    ctx.font = 'bold 18px "Bebas Neue",sans-serif';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = '#fff'; ctx.textAlign = 'right';
+    ctx.fillText(String(score).padStart(5,'0'), W - 80, 10);
+    ctx.font = '11px Arial'; ctx.fillStyle = '#aaa';
+    ctx.fillText('SCORE', W - 80, 30);
+    ctx.fillStyle = '#ffee00'; ctx.font = 'bold 14px "Bebas Neue",sans-serif';
+    ctx.fillText('HI ' + String(hiScore).padStart(5,'0'), W - 80, 46);
+    ctx.fillStyle = '#00ffcc'; ctx.font = 'bold 13px "Bebas Neue",sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('LVL ' + level, 12, 10);
+    ctx.restore();
+  }
+
+  /* ---- overlays ---- */
+  function drawIdle() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(10,10,20,0.72)'; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff3377'; ctx.font = 'bold 36px "Bebas Neue",sans-serif';
+    ctx.fillText('SKATER VS COP PIG', W/2, H/2 - 40);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 18px "Bebas Neue",sans-serif';
+    ctx.fillText('TAP OR PRESS SPACE TO START', W/2, H/2 + 4);
+    ctx.fillStyle = '#888'; ctx.font = '13px Arial';
+    ctx.fillText('Avoid everything the Cop Pig throws at you', W/2, H/2 + 28);
+    ctx.restore();
+  }
+
+  function drawDead() {
+    ctx.save();
+    ctx.fillStyle = 'rgba(10,10,20,0.78)'; ctx.fillRect(0, 0, W, H);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ff3377'; ctx.font = 'bold 46px "Bebas Neue",sans-serif';
+    ctx.fillText('BUSTED!', W/2, H/2 - 48);
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px "Bebas Neue",sans-serif';
+    ctx.fillText('SCORE: ' + score, W/2, H/2);
+    if (score > 0 && score >= hiScore) {
+      ctx.fillStyle = '#ffee00'; ctx.font = 'bold 16px "Bebas Neue",sans-serif';
+      ctx.fillText('NEW HIGH SCORE!', W/2, H/2 + 28);
+    }
+    ctx.fillStyle = '#aaa'; ctx.font = '15px Arial';
+    ctx.fillText('Tap / Space to Try Again', W/2, H/2 + 58);
+    ctx.restore();
+  }
+
+  /* ---- init / reset ---- */
+  function resetGame() {
+    score = 0; level = 1; spd = BASE_SPD; elapsed = 0;
+    spawnTimer = 0; levelTimer = 0;
+    obstacles = []; particles = [];
+    P.y = groundY; P.vy = 0; P.grounded = true; P.frameTimer = 0;
+    hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
+    initBg();
+  }
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    W = canvas.width  = rect.width  || canvas.offsetWidth  || 780;
+    H = canvas.height = rect.height || canvas.offsetHeight || 240;
+    groundY = H - 40;
+    if (gameState !== 'playing') { P.y = groundY; }
+  }
+
+  /* ---- main loop ---- */
+  function loop(ts) {
+    rafId = requestAnimationFrame(loop);
+    const dt = lastTs === null ? 0.016 : Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    ctx.fillStyle = '#0e0e1a'; ctx.fillRect(0, 0, W, H);
+    const grad = ctx.createLinearGradient(0, 0, 0, groundY);
+    grad.addColorStop(0, '#0e0e1a'); grad.addColorStop(1, '#1e1a30');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, groundY);
+
+    if (gameState === 'playing') {
+      skyOff    -= spd * 0.08 * dt;
+      midOff    -= spd * 0.30 * dt;
+      groundOff -= spd * dt;
+    }
+
+    drawBuildings(skyBuildings, skyOff, groundY - 20, 0.6);
+    drawBuildings(midBuildings, midOff, groundY - 10, 0.85);
+    drawGround();
+
+    if (gameState === 'playing') {
+      elapsed    += dt;
+      spawnTimer += dt;
+      levelTimer += dt;
+
+      P.vy += GRAV * dt; P.y += P.vy * dt; P.frameTimer += dt;
+      if (P.y >= groundY) { P.y = groundY; P.vy = 0; P.grounded = true; }
+
+      const interval = Math.max(0.9, 2.2 - (level - 1) * 0.1);
+      if (spawnTimer >= interval) { spawnObstacle(); spawnTimer = 0; }
+
+      if (levelTimer >= LEVEL_EVERY) {
+        levelTimer = 0; level++; spd = BASE_SPD + (level - 1) * SPD_STEP;
+      }
+
+      for (const o of obstacles) o.x -= o.spd * dt;
+      obstacles = obstacles.filter(o => o.x > -100);
+
+      for (const o of obstacles) {
+        if (!o.scored && o.x + o.w/2 < P.x - P.w/2) { o.scored = true; score++; }
+      }
+
+      for (const o of obstacles) {
+        if (collides(o)) {
+          gameState = 'dead';
+          burst();
+          if (score > hiScore) { hiScore = score; localStorage.setItem('skaterHiScore', hiScore); }
+          break;
+        }
+      }
+
+      updateParticles(dt);
+    }
+
+    for (const o of obstacles) drawObstacle(o);
+    drawParticles();
+    if (gameState !== 'dead' || particles.length > 0) drawPlayer();
+    drawCopPig();
+    drawHUD();
+    if (gameState === 'idle') drawIdle();
+    if (gameState === 'dead') drawDead();
+  }
+
+  /* ---- input ---- */
+  function handleInput() {
+    if (gameState === 'idle') { gameState = 'playing'; return; }
+    if (gameState === 'dead') { resetGame(); gameState = 'playing'; return; }
+    if (!P.grounded) return;
+    P.vy = JUMP_V; P.grounded = false;
+  }
+
+  /* ---- public init called by switchPage ---- */
   window.initGame = function () {
     if (!canvas) {
       canvas = document.getElementById('gameCanvas');
       ctx    = canvas.getContext('2d');
       window.addEventListener('resize', resize);
-      document.addEventListener('keydown', onKey);
-      canvas.addEventListener('pointerdown', onPointer);
+      document.addEventListener('keydown', e => {
+        if (e.code !== 'Space' && e.code !== 'ArrowUp') return;
+        const gp = document.getElementById('page-game');
+        if (!gp || !gp.classList.contains('active')) return;
+        e.preventDefault(); handleInput();
+      });
+      canvas.addEventListener('pointerdown', e => { e.preventDefault(); handleInput(); });
     }
     resize();
-    if (!rafId) draw();
+    hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
+    initBg();
+    if (gameState !== 'playing') { P.y = groundY; }
+    if (!rafId) { lastTs = null; rafId = requestAnimationFrame(loop); }
   };
-
-  function resize() {
-    const rect = canvas.getBoundingClientRect();
-    canvas.width  = rect.width  || canvas.offsetWidth  || 780;
-    canvas.height = rect.height || canvas.offsetHeight || 240;
-    groundY = canvas.height - 32;
-    if (gameState !== 'playing') P.y = pTop();
-  }
-
-  function onKey(e) {
-    const gp = document.getElementById('page-game');
-    if (!gp || !gp.classList.contains('active')) return;
-    if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); act(); }
-  }
-  function onPointer(e) { e.preventDefault(); act(); }
-
-  function act() {
-    if (gameState === 'idle' || gameState === 'over') { startGame(); return; }
-    if (!P.dead && P.grounded) { P.vy = P.JUMP; P.grounded = false; }
-  }
-
-  function startGame() {
-    score = 0; gameTime = 0;
-    balls = []; particles = [];
-    spawnAccum = 0;
-    ballSpd = BASE_SPEED; speedLevel = 0;
-    pendingSpeedUp = false; speedUpFlash = 0;
-    P.y = pTop(); P.vy = 0; P.grounded = true; P.dead = false;
-    gameState = 'playing';
-
-    if (timerHandle) clearInterval(timerHandle);
-    timerHandle = setInterval(() => {
-      if (gameState !== 'playing') return;
-      gameTime++;
-      // Schedule a speed up every N seconds (only one pending at a time)
-      if (gameTime % SPEED_UP_EVERY === 0 && !pendingSpeedUp) {
-        pendingSpeedUp = true;
-        // Stop spawning immediately — update() will resume once screen clears
-      }
-    }, 1000);
-
-    if (!rafId) { lastTs = performance.now(); rafId = requestAnimationFrame(loop); }
-  }
-
-  function endGame() {
-    gameState = 'over';
-    if (score    > hiScore)   hiScore   = score;
-    if (gameTime > bestTime)  bestTime  = gameTime;
-    if (timerHandle) { clearInterval(timerHandle); timerHandle = null; }
-  }
-
-  function loop(ts) {
-    const dt = Math.min((ts - lastTs) / 1000, 0.05);
-    lastTs = ts;
-    if (gameState === 'playing') update(dt);
-    draw();
-    rafId = requestAnimationFrame(loop);
-  }
-
-  function update(dt) {
-    // Speed up: apply once every ball from the previous wave has left
-    if (pendingSpeedUp && balls.length === 0) {
-      speedLevel++;
-      ballSpd    = BASE_SPEED + speedLevel * SPEED_STEP;
-      pendingSpeedUp = false;
-      speedUpFlash   = 1.8;
-      spawnAccum     = 0; // fresh gap before first ball of new wave
-    }
-
-    // Only spawn when not waiting for the screen to clear
-    if (!pendingSpeedUp) {
-      spawnAccum += dt * 1000;
-      if (spawnAccum >= SPAWN_GAP) { spawnAccum -= SPAWN_GAP; spawnBall(); }
-    }
-
-    if (speedUpFlash > 0) speedUpFlash -= dt;
-
-    // Player physics
-    if (!P.grounded) { P.vy += P.GRAV * dt; P.y += P.vy * dt; }
-    if (P.y >= pTop()) { P.y = pTop(); P.vy = 0; P.grounded = true; }
-    if (P.grounded) {
-      P.legTimer += dt;
-      if (P.legTimer > 0.09) { P.legFrame ^= 1; P.legTimer = 0; }
-    }
-
-    // Particles
-    particles = particles.filter(p => {
-      p.x += p.vx * dt; p.y += p.vy * dt;
-      p.vy += 420 * dt; p.life -= dt;
-      return p.life > 0;
-    });
-
-    // Balls
-    const px = P.x + P.w / 2, py = P.y + P.h / 2;
-    let hit = false;
-    balls = balls.filter(b => {
-      b.x -= b.spd * dt;
-
-      // Collision
-      if (!hit && Math.hypot(px - b.x, py - b.y) < b.r + 10) {
-        hit = true;
-        deathBurst();
-        P.dead = true;
-        return false;
-      }
-
-      // Ball cleared the player — avoided
-      if (b.x + b.r < P.x) { score++; return false; }
-
-      return b.x + b.r > -10;
-    });
-
-    if (hit) endGame();
-  }
-
-  function spawnBall() {
-    const JUMP_H = 145;
-    const fracs  = [0, 0, 0, 0.45, 0.85];
-    const frac   = fracs[Math.floor(Math.random() * fracs.length)];
-    const r      = 13 + Math.random() * 10;
-    const COLS   = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF922B', '#F59AE8', '#ffffff'];
-    balls.push({
-      x:    canvas.width + r + 10,
-      y:    groundY - r - frac * JUMP_H,
-      r,
-      color: COLS[Math.floor(Math.random() * COLS.length)],
-      spd:  ballSpd   // uniform speed — no random variance
-    });
-  }
-
-  function deathBurst() {
-    for (let i = 0; i < 14; i++) {
-      const a = (Math.PI * 2 * i / 14) + Math.random() * 0.3;
-      const s = 90 + Math.random() * 130;
-      particles.push({
-        x: P.x + P.w / 2, y: P.y + P.h / 2,
-        vx: Math.cos(a) * s, vy: Math.sin(a) * s - 80,
-        color: i % 2 === 0 ? '#E8215A' : '#FFD93D',
-        r: 4 + Math.random() * 5, life: 0.6 + Math.random() * 0.3
-      });
-    }
-  }
-
-  /* ── Drawing ── */
-  function draw() {
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // Background
-    const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#0e0016'); bg.addColorStop(1, '#26002e');
-    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-
-    // Ground
-    ctx.fillStyle = '#E8215A';
-    ctx.fillRect(0, groundY, W, 3);
-    const gl = ctx.createLinearGradient(0, groundY, 0, H);
-    gl.addColorStop(0, 'rgba(232,33,90,0.2)'); gl.addColorStop(1, 'transparent');
-    ctx.fillStyle = gl; ctx.fillRect(0, groundY + 3, W, H - groundY - 3);
-
-    // Particles
-    particles.forEach(p => {
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, p.life * 2.2);
-      ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color; ctx.shadowBlur = 8;
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    });
-
-    // Balls
-    balls.forEach(b => {
-      ctx.save();
-      ctx.shadowColor = b.color; ctx.shadowBlur = 18;
-      ctx.fillStyle = b.color;
-      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = 'rgba(255,255,255,0.38)';
-      ctx.beginPath(); ctx.arc(b.x - b.r * 0.3, b.y - b.r * 0.3, b.r * 0.38, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    });
-
-    if (gameState !== 'over' || !P.dead || particles.length > 0) drawPlayer();
-
-    if (gameState !== 'idle') drawHUD();
-    if (gameState === 'idle') drawIdle();
-    if (gameState === 'over') drawOver();
-
-    // Speed-up flash banner (shown during play and briefly after)
-    if (speedUpFlash > 0 && gameState === 'playing') drawSpeedUpBanner();
-  }
-
-  function drawPlayer() {
-    const x = Math.round(P.x), y = Math.round(P.y), w = P.w, h = P.h;
-    const la     = P.grounded ? (P.legFrame ? 9 : -9) : 5;
-    const scared = !P.dead && balls.some(b => b.x - (x + w) < 110 && b.x > x);
-    ctx.save();
-
-    if (P.grounded) {
-      ctx.fillStyle = 'rgba(232,33,90,0.22)';
-      ctx.beginPath(); ctx.ellipse(x + w / 2, groundY + 3, w * 0.55, 4, 0, 0, Math.PI * 2); ctx.fill();
-    }
-
-    ctx.fillStyle = '#A01038';
-    ctx.fillRect(x + 6,    y + h - 18, 10, 20 + la);
-    ctx.fillRect(x + w-16, y + h - 18, 10, 20 - la + 4);
-
-    ctx.fillStyle = '#111';
-    ctx.fillRect(x + 3,    y + h + Math.max(la, 0) + 2, 16, 6);
-    ctx.fillRect(x + w-19, y + h - Math.min(la, 0) + 6, 16, 6);
-
-    ctx.fillStyle = '#E8215A';
-    ctx.fillRect(x + 3, y + 20, w - 6, h - 34);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 17px "Bebas Neue",sans-serif';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('V', x + w / 2, y + 38);
-
-    ctx.fillStyle = '#E8215A';
-    if (scared) {
-      ctx.fillRect(x - 8, y + 12, 8, 10);
-      ctx.fillRect(x + w, y + 12, 8, 10);
-    } else {
-      ctx.fillRect(x - 5, y + 22, 8, P.grounded ? 13 - la / 2 : 10);
-      ctx.fillRect(x + w - 3, y + 22, 8, P.grounded ? 13 + la / 2 : 10);
-    }
-
-    ctx.fillStyle = '#ffc89a';
-    ctx.beginPath(); ctx.arc(x + w / 2, y + 11, 12, 0, Math.PI * 2); ctx.fill();
-
-    ctx.fillStyle = '#1a1a1a';
-    ctx.beginPath(); ctx.arc(x + w / 2, y + 3, 9, Math.PI, 0); ctx.fill();
-
-    ctx.fillStyle = '#111';
-    if (P.dead) {
-      ctx.strokeStyle = '#111'; ctx.lineWidth = 2;
-      [[x + w/2 - 6, y + 9], [x + w/2 + 5, y + 9]].forEach(([ex, ey]) => {
-        ctx.beginPath(); ctx.moveTo(ex-3, ey-3); ctx.lineTo(ex+3, ey+3); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(ex+3, ey-3); ctx.lineTo(ex-3, ey+3); ctx.stroke();
-      });
-    } else if (scared) {
-      ctx.beginPath(); ctx.arc(x + w/2 - 4, y + 10, 3.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + w/2 + 5, y + 10, 3.5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(x + w/2 - 3, y + 9, 1.2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(x + w/2 + 6, y + 9, 1.2, 0, Math.PI * 2); ctx.fill();
-    } else {
-      ctx.beginPath(); ctx.arc(x + w/2 + 5, y + 10, 2.2, 0, Math.PI * 2); ctx.fill();
-    }
-
-    ctx.lineWidth = 1.8;
-    if (P.dead || scared) {
-      ctx.strokeStyle = '#c0392b';
-      ctx.beginPath(); ctx.arc(x + w/2 + 3, y + 19, 3.5, Math.PI, 0, true); ctx.stroke();
-    } else {
-      ctx.strokeStyle = '#8B4513';
-      ctx.beginPath(); ctx.arc(x + w/2 + 4, y + 16, 3, 0.1, Math.PI - 0.1); ctx.stroke();
-    }
-
-    ctx.restore();
-  }
-
-  function fmtTime(s) {
-    if (s < 60) return s + 's';
-    return Math.floor(s / 60) + 'm ' + (s % 60) + 's';
-  }
-
-  function drawHUD() {
-    ctx.save();
-    ctx.font = '22px "Bebas Neue",sans-serif';
-    ctx.textBaseline = 'top';
-
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'left';
-    ctx.fillText('AVOIDED: ' + score, 14, 10);
-
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#FFD93D';
-    ctx.fillText(fmtTime(gameTime), canvas.width / 2, 10);
-
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
-    ctx.fillText('BEST: ' + hiScore, canvas.width - 14, 10);
-    ctx.restore();
-  }
-
-  function drawSpeedUpBanner() {
-    const alpha = Math.min(1, speedUpFlash / 0.4); // fade in quickly, hold, fade out
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(0, canvas.height / 2 - 36, canvas.width, 52);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#FFD93D';
-    ctx.font = '38px "Bebas Neue",sans-serif';
-    ctx.shadowColor = '#FFD93D'; ctx.shadowBlur = 20;
-    ctx.fillText('SPEED UP!  LVL ' + speedLevel, canvas.width / 2, canvas.height / 2 - 10);
-    ctx.restore();
-  }
-
-  function drawIdle() {
-    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const cy = canvas.height / 2;
-    ctx.fillStyle = '#E8215A';
-    ctx.font = '40px "Bebas Neue",sans-serif';
-    ctx.fillText('COCKTAIL BLAST', canvas.width / 2, cy - 22);
-    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-    ctx.font = '18px "Bebas Neue",sans-serif';
-    ctx.fillText('JUMP OVER THE BALLS  -  ONE HIT AND YOU\'RE OUT', canvas.width / 2, cy + 10);
-    ctx.fillStyle = '#FFD93D';
-    ctx.font = '16px "Bebas Neue",sans-serif';
-    ctx.fillText('PRESS SPACE OR TAP TO START', canvas.width / 2, cy + 34);
-    ctx.restore();
-  }
-
-  function drawOver() {
-    ctx.save();
-    ctx.fillStyle = 'rgba(0,0,0,0.65)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    const cy = canvas.height / 2;
-
-    ctx.fillStyle = '#E8215A';
-    ctx.font = '50px "Bebas Neue",sans-serif';
-    ctx.fillText('GAME OVER', canvas.width / 2, cy - 46);
-
-    ctx.fillStyle = '#FFD93D';
-    ctx.font = '26px "Bebas Neue",sans-serif';
-    ctx.fillText('BALLS AVOIDED: ' + score + '   |   SURVIVED: ' + fmtTime(gameTime), canvas.width / 2, cy + 2);
-
-    const isHi = score > 0 && score === hiScore;
-    ctx.fillStyle = isHi ? '#6BCB77' : 'rgba(255,255,255,0.5)';
-    ctx.font = '19px "Bebas Neue",sans-serif';
-    ctx.fillText(isHi ? 'NEW HIGH SCORE!' : 'BEST: ' + hiScore + ' avoided  /  ' + fmtTime(bestTime) + ' survived', canvas.width / 2, cy + 36);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = '17px "Bebas Neue",sans-serif';
-    ctx.fillText('TAP OR PRESS SPACE TO PLAY AGAIN', canvas.width / 2, cy + 64);
-    ctx.restore();
-  }
 })();
 
-/* ═══════════════════════════════════════
-   TODO: Google Places API (μελλοντικά)
-   ─────────────────────────────────────
-   Όταν έχεις Place ID + API Key:
-   1. Πρόσθεσε τα εδώ:
+/* =======================================
+   TODO: Google Places API (future)
+   -------------------------------------
+   When you have Place ID + API Key:
+   1. Add here:
         const GOOGLE_PLACE_ID = 'ChIJ...';
         const GOOGLE_API_KEY  = 'AIzaSy...';
-   2. Ενεργοποίησε "Places API (New)" στο Google Cloud Console
-   3. Η αξιολόγηση θα τραβάει αυτόματα τα πραγματικά reviews
-      και το κουμπί θα ανοίγει απευθείας το write-review dialog:
+   2. Enable "Places API (New)" in Google Cloud Console
+   3. Reviews will load automatically and the button
+      will open the write-review dialog directly:
         https://search.google.com/local/writereview?placeid=PLACE_ID
-═══════════════════════════════════════ */
+======================================= */
