@@ -73,6 +73,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const GAME_W = 820;
   const GAME_H = 334;
 
+  // ---- Sprite paths — swap these for real assets when designer delivers them ----
+  const SKATER_RUN_SRCS  = [
+    'assets/images/skater_run_1.png',
+    'assets/images/skater_run_2.png',
+    'assets/images/skater_run_3.png',
+    'assets/images/skater_run_4.png',
+  ];
+  const SKATER_JUMP_SRCS = ['assets/images/skater_jump.png'];
+  const COP_SRCS         = [
+    'assets/images/cop_idle_1.png',
+    'assets/images/cop_idle_2.png',
+    'assets/images/cop_idle_3.png',
+  ];
+  const SKATER_RUN_FPS  = 10;   // frames/sec while running
+  const SKATER_JUMP_FPS =  4;   // frames/sec while airborne
+  const COP_FPS         =  5;   // frames/sec for cop idle loop
+
   let canvas, ctx;
   let W, H, groundY;
   let gameState = 'idle';
@@ -88,6 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
   let donutDangerImg = null, donutDangerReady = false;
   let donutSafeImg = null, donutSafeReady = false;
 
+  // PNG sprite frame arrays (primary) — SVGs above remain as fallback
+  let skaterRunFrames  = [], skaterRunReady  = false;
+  let skaterJumpFrames = [], skaterJumpReady = false;
+  let copPigFrames     = [], copPigReady     = false;
+
+  // Animation timers and current frame indices
+  let skaterAnimTimer = 0, skaterAnimFrame = 0;
+  let copAnimTimer    = 0, copAnimFrame    = 0;
+
   let copShooting = 0;
 
   const P = {
@@ -96,12 +122,31 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* ---- image loading ---- */
+
+  // Loads an array of image paths; calls onAllDone(frames) when every
+  // request settles (load or error).  Frames that 404 will have
+  // naturalWidth === 0 and are skipped at draw time.
+  function loadFrameArray(srcs, onAllDone) {
+    if (!srcs.length) { onAllDone([]); return []; }
+    var frames = srcs.map(function (src) {
+      var img = new Image(); img.src = src; return img;
+    });
+    var pending = frames.length;
+    frames.forEach(function (img) {
+      img.onload = img.onerror = function () {
+        if (--pending === 0) onAllDone(frames);
+      };
+    });
+    return frames;
+  }
+
   function loadImages() {
     if (!bgImg) {
       bgImg = new Image();
       bgImg.onload = function () { bgReady = true; };
       bgImg.src = 'assets/images/graffiti-banner.jpg';
     }
+    // SVG fallbacks — used automatically when PNG sprites haven't loaded
     if (!skaterImg) {
       skaterImg = new Image();
       skaterImg.onload = function () { skaterReady = true; };
@@ -111,6 +156,22 @@ document.addEventListener('DOMContentLoaded', () => {
       copImg = new Image();
       copImg.onload = function () { copReady = true; };
       copImg.src = 'assets/images/cop-pig.svg';
+    }
+    // PNG sprite frames — take priority over SVGs once at least one frame loads
+    if (!skaterRunFrames.length) {
+      skaterRunFrames = loadFrameArray(SKATER_RUN_SRCS, function (frames) {
+        skaterRunReady = frames.some(function (f) { return f.naturalWidth > 0; });
+      });
+    }
+    if (!skaterJumpFrames.length) {
+      skaterJumpFrames = loadFrameArray(SKATER_JUMP_SRCS, function (frames) {
+        skaterJumpReady = frames.some(function (f) { return f.naturalWidth > 0; });
+      });
+    }
+    if (!copPigFrames.length) {
+      copPigFrames = loadFrameArray(COP_SRCS, function (frames) {
+        copPigReady = frames.some(function (f) { return f.naturalWidth > 0; });
+      });
     }
     if (!donutDangerImg) {
       donutDangerImg = new Image();
@@ -154,24 +215,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ---- player ---- */
+  function pickFrame(pngFrames, pngReady, fallbackImg, fallbackReady, frameIdx) {
+    if (pngReady && pngFrames.length) {
+      var f = pngFrames[frameIdx % pngFrames.length];
+      if (f && f.naturalWidth > 0) return f;
+    }
+    return fallbackReady ? fallbackImg : null;
+  }
+
   function drawPlayer() {
     const px = P.x, py = P.y;
+    const sh = Math.round(H * 0.22), sw = Math.round(sh * 64 / 88);
     ctx.save();
-    // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(px, groundY + 4, 26, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-    if (skaterReady) {
-      // SVG viewBox 0 0 60 82; wheel bottom at y=82 aligns with P.y
-      const sh = Math.round(H * 0.22), sw = Math.round(sh * 64 / 88);
-      // slight tilt when airborne
+    ctx.beginPath(); ctx.ellipse(px, groundY + 4, sw * 0.42, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+    const img = P.grounded
+      ? pickFrame(skaterRunFrames,  skaterRunReady,  skaterImg, skaterReady, skaterAnimFrame)
+      : pickFrame(skaterJumpFrames, skaterJumpReady, skaterImg, skaterReady, skaterAnimFrame);
+
+    if (img) {
       if (!P.grounded) {
-        ctx.translate(px, py);
-        ctx.rotate(-0.15);
-        ctx.drawImage(skaterImg, -sw / 2, -sh, sw, sh);
+        ctx.translate(px, py); ctx.rotate(-0.15);
+        ctx.drawImage(img, -sw / 2, -sh, sw, sh);
       } else {
-        ctx.drawImage(skaterImg, px - sw / 2, py - sh, sw, sh);
+        ctx.drawImage(img, px - sw / 2, py - sh, sw, sh);
       }
     }
     ctx.restore();
@@ -179,22 +247,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ---- villain ---- */
   function drawCopPig() {
-    // SVG viewBox 0 0 80 120; boot bottom at y=117, align to groundY
-    // body center in SVG at x=48, align to W-70 on screen
     const cx = W - Math.max(50, Math.round(W * 0.09)), cy = groundY;
     const sh = Math.round(H * 0.22), sw = Math.round(sh * 90 / 135);
     const drawX = cx - 48 * (sw / 80);
     const drawY = cy - 117 * (sh / 120);
 
     ctx.save();
-    // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath(); ctx.ellipse(cx + 5, cy + 4, 28, 6, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 5, cy + 4, sw * 0.42, 5, 0, 0, Math.PI * 2); ctx.fill();
 
-    if (copReady) {
-      // bounce body slightly when shooting
+    const img = pickFrame(copPigFrames, copPigReady, copImg, copReady, copAnimFrame);
+    if (img) {
       const bounceY = copShooting > 0 ? -4 : 0;
-      ctx.drawImage(copImg, drawX, drawY + bounceY, sw, sh);
+      ctx.drawImage(img, drawX, drawY + bounceY, sw, sh);
     }
     ctx.restore();
   }
@@ -334,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
     levelTimer = 0; shootTimer = 0;
     shots = []; particles = [];
     copShooting = 0;
+    skaterAnimTimer = 0; skaterAnimFrame = 0;
     P.y = groundY; P.vy = 0; P.grounded = true; P.frameTimer = 0;
     hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
     groundOff = 0;
@@ -400,6 +466,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       updateParticles(dt);
+
+      // advance skater animation
+      const skateFps = P.grounded ? SKATER_RUN_FPS : SKATER_JUMP_FPS;
+      skaterAnimTimer += dt;
+      if (skaterAnimTimer >= 1 / skateFps) {
+        skaterAnimTimer -= 1 / skateFps;
+        skaterAnimFrame++;
+      }
+    }
+
+    // cop pig animates continuously (always visible)
+    copAnimTimer += dt;
+    if (copAnimTimer >= 1 / COP_FPS) {
+      copAnimTimer -= 1 / COP_FPS;
+      copAnimFrame++;
     }
 
     for (const s of shots) drawShot(s);
