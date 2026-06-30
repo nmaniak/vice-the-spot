@@ -79,21 +79,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let rafId = null, lastTs = null;
   let groundOff = 0;
   let bgImg = null, bgReady = false;
+  let skaterImg = null, skaterReady = false;
+  let copImg = null, copReady = false;
 
-  // Cop pig arm angle for shoot animation
-  let copArmAngle = 0, copShooting = 0;
+  let copShooting = 0;
 
   const P = {
     x: 90, y: 0, w: 34, h: 54,
     vy: 0, grounded: true, frameTimer: 0,
   };
 
-  /* ---- background image ---- */
-  function loadBg() {
-    if (bgImg) return;
-    bgImg = new Image();
-    bgImg.onload = function () { bgReady = true; };
-    bgImg.src = 'assets/images/graffiti-banner.jpg';
+  /* ---- image loading ---- */
+  function loadImages() {
+    if (!bgImg) {
+      bgImg = new Image();
+      bgImg.onload = function () { bgReady = true; };
+      bgImg.src = 'assets/images/graffiti-banner.jpg';
+    }
+    if (!skaterImg) {
+      skaterImg = new Image();
+      skaterImg.onload = function () { skaterReady = true; };
+      skaterImg.src = 'assets/images/skater.svg';
+    }
+    if (!copImg) {
+      copImg = new Image();
+      copImg.onload = function () { copReady = true; };
+      copImg.src = 'assets/images/cop-pig.svg';
+    }
   }
 
   function drawBg() {
@@ -129,121 +141,45 @@ document.addEventListener('DOMContentLoaded', () => {
   function drawPlayer() {
     const px = P.x, py = P.y;
     ctx.save();
-
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.ellipse(px, groundY + 4, 20, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(px, groundY + 4, 26, 5, 0, 0, Math.PI * 2);
     ctx.fill();
-
-    const boardY = py + 2;
-    ctx.fillStyle = '#cc2255';
-    ctx.beginPath(); ctx.roundRect(px - 22, boardY, 44, 7, 3); ctx.fill();
-    ctx.fillStyle = '#333';
-    ctx.beginPath();
-    ctx.arc(px - 14, boardY + 7, 5, 0, Math.PI * 2);
-    ctx.arc(px + 14, boardY + 7, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#ff3377';
-    ctx.beginPath();
-    ctx.arc(px - 14, boardY + 7, 3, 0, Math.PI * 2);
-    ctx.arc(px + 14, boardY + 7, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    const top = py - P.h;
-    ctx.fillStyle = '#e8215a';
-    ctx.beginPath(); ctx.roundRect(px - 11, top + 18, 22, 26, 4); ctx.fill();
-    ctx.fillStyle = '#c41a4a';
-    ctx.beginPath(); ctx.arc(px, top + 18, 12, Math.PI, 0); ctx.fill();
-    ctx.fillStyle = '#f4c48e';
-    ctx.beginPath(); ctx.arc(px, top + 13, 11, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#222';
-    ctx.beginPath();
-    ctx.arc(px - 4, top + 12, 2, 0, Math.PI * 2);
-    ctx.arc(px + 4, top + 12, 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    const kick = P.grounded ? Math.sin(P.frameTimer * 8) * 6 : 0;
-    ctx.strokeStyle = '#1a1a2e'; ctx.lineWidth = 5; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(px - 4, top + 44); ctx.lineTo(px - 8 + kick, boardY); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(px + 4, top + 44); ctx.lineTo(px + 8 - kick, boardY); ctx.stroke();
-
+    if (skaterReady) {
+      // SVG viewBox 0 0 60 82; wheel bottom at y=82 aligns with P.y
+      const sw = 64, sh = 88;
+      // slight tilt when airborne
+      if (!P.grounded) {
+        ctx.translate(px, py);
+        ctx.rotate(-0.15);
+        ctx.drawImage(skaterImg, -sw / 2, -sh, sw, sh);
+      } else {
+        ctx.drawImage(skaterImg, px - sw / 2, py - sh, sw, sh);
+      }
+    }
     ctx.restore();
   }
 
   /* ---- cop pig ---- */
   function drawCopPig() {
+    // SVG viewBox 0 0 80 120; boot bottom at y=117, align to groundY
+    // body center in SVG at x=48, align to W-70 on screen
     const cx = W - 70, cy = groundY;
+    const sw = 90, sh = 135;
+    const drawX = cx - 48 * (sw / 80);
+    const drawY = cy - 117 * (sh / 120);
+
     ctx.save();
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    ctx.beginPath(); ctx.ellipse(cx + 5, cy + 4, 28, 6, 0, 0, Math.PI * 2); ctx.fill();
 
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.beginPath(); ctx.ellipse(cx, cy + 4, 24, 6, 0, 0, Math.PI * 2); ctx.fill();
-
-    // body
-    ctx.fillStyle = '#4a90d9';
-    ctx.beginPath(); ctx.roundRect(cx - 18, cy - 60, 36, 40, 6); ctx.fill();
-
-    // badge
-    ctx.fillStyle = '#ffd700';
-    ctx.beginPath(); ctx.arc(cx - 4, cy - 45, 6, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#b8860b'; ctx.font = 'bold 5px Arial'; ctx.textAlign = 'center';
-    ctx.fillText('PIG', cx - 4, cy - 43);
-
-    // legs + boots
-    ctx.fillStyle = '#2a60a0';
-    ctx.fillRect(cx - 14, cy - 24, 10, 24);
-    ctx.fillRect(cx + 4,  cy - 24, 10, 24);
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(cx - 15, cy - 3, 12, 7);
-    ctx.fillRect(cx + 3,  cy - 3, 12, 7);
-
-    // head
-    ctx.fillStyle = '#ffaacc';
-    ctx.beginPath(); ctx.arc(cx, cy - 72, 18, 0, Math.PI * 2); ctx.fill();
-
-    // hat
-    ctx.fillStyle = '#2a60a0';
-    ctx.fillRect(cx - 20, cy - 92, 40, 6);
-    ctx.fillRect(cx - 14, cy - 108, 28, 20);
-    ctx.fillStyle = '#ffd700';
-    ctx.beginPath(); ctx.arc(cx, cy - 100, 4, 0, Math.PI * 2); ctx.fill();
-
-    // snout
-    ctx.fillStyle = '#ff99bb';
-    ctx.beginPath(); ctx.ellipse(cx, cy - 69, 10, 7, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#cc5577';
-    ctx.beginPath();
-    ctx.arc(cx - 4, cy - 69, 2.5, 0, Math.PI * 2);
-    ctx.arc(cx + 4, cy - 69, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // eyes
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(cx - 7, cy - 76, 5, 0, Math.PI * 2);
-    ctx.arc(cx + 7, cy - 76, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#111';
-    ctx.beginPath();
-    ctx.arc(cx - 7, cy - 75, 2.5, 0, Math.PI * 2);
-    ctx.arc(cx + 7, cy - 75, 2.5, 0, Math.PI * 2);
-    ctx.fill();
-    // angry brows
-    ctx.strokeStyle = '#333'; ctx.lineWidth = 2.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - 12, cy - 83); ctx.lineTo(cx - 3, cy - 80);
-    ctx.moveTo(cx + 12, cy - 83); ctx.lineTo(cx + 3, cy - 80);
-    ctx.stroke();
-
-    // throwing arm — animates when shooting
-    const armAngle = copArmAngle;
-    const armX = cx - 18 + Math.cos(armAngle) * 22;
-    const armY = cy - 52 + Math.sin(armAngle) * 22;
-    ctx.strokeStyle = '#4a90d9'; ctx.lineWidth = 8; ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(cx - 18, cy - 52); ctx.lineTo(armX, armY); ctx.stroke();
-    // fist
-    ctx.fillStyle = '#ffaacc';
-    ctx.beginPath(); ctx.arc(armX, armY, 5, 0, Math.PI * 2); ctx.fill();
-
+    if (copReady) {
+      // bounce body slightly when shooting
+      const bounceY = copShooting > 0 ? -4 : 0;
+      ctx.drawImage(copImg, drawX, drawY + bounceY, sw, sh);
+    }
     ctx.restore();
   }
 
@@ -402,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     score = 0; level = 1; spd = BASE_SPD; elapsed = 0;
     coneTimer = 0; levelTimer = 0; shootTimer = 0;
     cones = []; shots = []; particles = [];
-    copArmAngle = 0; copShooting = 0;
+    copShooting = 0;
     P.y = groundY; P.vy = 0; P.grounded = true; P.frameTimer = 0;
     hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
     groundOff = 0;
@@ -433,10 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
       levelTimer += dt;
       shootTimer += dt;
 
-      // cop arm idle sway
-      copArmAngle = copShooting > 0
-        ? -Math.PI * 0.55   // throw position
-        : Math.PI * 0.18 + Math.sin(elapsed * 1.4) * 0.12;
       if (copShooting > 0) copShooting -= dt;
 
       // player physics
@@ -523,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
       canvas.addEventListener('pointerdown', e => { e.preventDefault(); handleInput(); });
     }
     resize();
-    loadBg();
+    loadImages();
     hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
     if (gameState !== 'playing') P.y = groundY;
     if (!rafId) { lastTs = null; rafId = requestAnimationFrame(loop); }

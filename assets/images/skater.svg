@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 82">
+  <!-- Wheels -->
+  <circle cx="12" cy="77" r="5" fill="#222"/>
+  <circle cx="12" cy="77" r="3" fill="#ff3377"/>
+  <circle cx="48" cy="77" r="5" fill="#222"/>
+  <circle cx="48" cy="77" r="3" fill="#ff3377"/>
+  <!-- Deck -->
+  <rect x="2" y="67" width="56" height="9" rx="4" fill="#cc2255"/>
+  <!-- Deck grip tape -->
+  <rect x="8" y="68" width="44" height="3" rx="1" fill="#aa1144" opacity="0.5"/>
+
+  <!-- Left leg -->
+  <rect x="19" y="46" width="9" height="23" rx="4" fill="#1a1a2e"/>
+  <!-- Right leg -->
+  <rect x="32" y="46" width="9" height="23" rx="4" fill="#1a1a2e"/>
+  <!-- Left shoe -->
+  <rect x="14" y="62" width="16" height="7" rx="3" fill="#111"/>
+  <!-- Right shoe -->
+  <rect x="30" y="62" width="16" height="7" rx="3" fill="#111"/>
+
+  <!-- Body / hoodie -->
+  <rect x="14" y="24" width="32" height="28" rx="6" fill="#e8215a"/>
+  <!-- Hoodie pocket -->
+  <rect x="20" y="40" width="20" height="10" rx="3" fill="#c41a4a"/>
+
+  <!-- Left arm -->
+  <rect x="2" y="28" width="14" height="9" rx="4" fill="#e8215a"/>
+  <!-- Right arm -->
+  <rect x="44" y="28" width="14" height="9" rx="4" fill="#e8215a"/>
+  <!-- Left hand -->
+  <circle cx="4" cy="32" r="5" fill="#f4c48e"/>
+  <!-- Right hand -->
+  <circle cx="56" cy="32" r="5" fill="#f4c48e"/>
+
+  <!-- Hood -->
+  <ellipse cx="30" cy="25" rx="15" ry="8" fill="#c41a4a"/>
+
+  <!-- Head -->
+  <circle cx="30" cy="14" r="13" fill="#f4c48e"/>
+
+  <!-- Beanie -->
+  <rect x="17" y="4" width="26" height="14" rx="7" fill="#1a1a2e"/>
+  <rect x="15" y="11" width="30" height="5" rx="2" fill="#333"/>
+  <!-- Beanie stripe -->
+  <rect x="15" y="13" width="30" height="2" rx="1" fill="#e8215a"/>
+
+  <!-- Eyes -->
+  <circle cx="25" cy="14" r="3" fill="#222"/>
+  <circle cx="35" cy="14" r="3" fill="#222"/>
+  <circle cx="26" cy="13" r="1.2" fill="white"/>
+  <circle cx="36" cy="13" r="1.2" fill="white"/>
+
+  <!-- Smirk -->
+  <path d="M 27 20 Q 31 23 35 20" stroke="#8B4513" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+
+  <!-- V on chest -->
+  <text x="30" y="38" text-anchor="middle" font-family="Arial Black, sans-serif" font-weight="900" font-size="13" fill="white">V</text>
+</svg>
