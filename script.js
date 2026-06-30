@@ -69,6 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const BASE_SHOOT  = 2.6;
   const SHOOT_MIN   = 1.0;
 
+  // Fixed internal canvas resolution — matches background image ratio (2752:1120)
+  const GAME_W = 820;
+  const GAME_H = 334;
+
   let canvas, ctx;
   let W, H, groundY;
   let gameState = 'idle';
@@ -178,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // SVG viewBox 0 0 80 120; boot bottom at y=117, align to groundY
     // body center in SVG at x=48, align to W-70 on screen
     const cx = W - Math.max(50, Math.round(W * 0.09)), cy = groundY;
-    const sh = Math.round(H * 0.56), sw = Math.round(sh * 90 / 135);
+    const sh = Math.round(H * 0.22), sw = Math.round(sh * 90 / 135);
     const drawX = cx - 48 * (sw / 80);
     const drawY = cy - 117 * (sh / 120);
 
@@ -336,11 +340,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function resize() {
-    const rect = canvas.getBoundingClientRect();
-    W = canvas.width  = rect.width  || canvas.offsetWidth  || 780;
-    H = canvas.height = rect.height || canvas.offsetHeight || 240;
-    groundY = H - Math.max(30, Math.round(H * 0.15));
-    P.x = Math.max(60, Math.round(W * 0.115));
+    // Lock internal resolution — CSS scales the display with letterboxing
+    canvas.width  = GAME_W;
+    canvas.height = GAME_H;
+    W = GAME_W;
+    H = GAME_H;
+    groundY = H - Math.round(H * 0.15);
+    P.x = Math.round(W * 0.115);
     if (gameState !== 'playing') P.y = groundY;
   }
 
