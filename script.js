@@ -74,8 +74,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let gameState = 'idle';
   let score = 0, hiScore = 0;
   let level = 1, spd = BASE_SPD, elapsed = 0;
-  let coneTimer = 0, levelTimer = 0, shootTimer = 0;
-  let cones = [], shots = [], particles = [];
+  let levelTimer = 0, shootTimer = 0;
+  let shots = [], particles = [];
   let rafId = null, lastTs = null;
   let groundOff = 0;
   let bgImg = null, bgReady = false;
@@ -183,38 +183,22 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
-  /* ---- cones (ground obstacles from edge) ---- */
-  function spawnCone() {
-    cones.push({ x: W + 30, y: groundY, w: 22, h: 38, spd: spd, scored: false });
-  }
+  /* ---- cop shots: donuts at varied heights ---- */
+  // Heights above ground: 0=rolling, 28=low, 50=mid, 70=high (passes over standing player)
+  const SHOT_HEIGHTS = [0, 28, 50, 70];
 
-  function drawCone(o) {
-    const x = o.x, y = o.y;
-    ctx.save();
-    ctx.fillStyle = '#ff6600';
-    ctx.beginPath(); ctx.moveTo(x, y - o.h); ctx.lineTo(x - o.w/2, y); ctx.lineTo(x + o.w/2, y); ctx.closePath(); ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillRect(x - o.w/2 + 2, y - 20, o.w - 4, 5);
-    ctx.restore();
-  }
-
-  /* ---- cop shots (donuts thrown from cop position) ---- */
   function shoot() {
-    const cx = W - 70, cy = groundY;
-    // Alternate: rolling ground shot or low-arc thrown shot
-    const rolling = Math.random() < 0.5;
-    const startY  = rolling ? groundY : cy - 52;
-    // vertical velocity for arced throws (rolling has vy=0, but gravity applies to both)
-    const vy      = rolling ? 0 : -80 - Math.random() * 60;
+    const h = SHOT_HEIGHTS[Math.floor(Math.random() * SHOT_HEIGHTS.length)];
     shots.push({
-      x: cx - 20, y: startY,
+      x: W - 90,
+      y: groundY - h,
       vx: -spd,
-      vy: vy,
-      r: 11,
-      rot: 0, rotSpd: (Math.random() - 0.5) * 10,
+      r: 12,
+      rot: 0,
+      rotSpd: (Math.random() > 0.5 ? 1 : -1) * (4 + Math.random() * 5),
       scored: false,
     });
-    copShooting = 0.25; // animate arm for 0.25s
+    copShooting = 0.25;
   }
 
   function drawShot(s) {
@@ -244,13 +228,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const nearX = Math.max(cx - hw, Math.min(x, cx + hw));
     const nearY = Math.max(cy - hh/2, Math.min(y, cy + hh/2));
     return Math.hypot(x - nearX, y - nearY) < r;
-  }
-
-  function coneHitsPlayer(o) {
-    const hw = P.w * 0.4, hh = P.h * 0.7;
-    const px = P.x, py = P.y - hh / 2;
-    return px + hw > o.x - o.w/2 && px - hw < o.x + o.w/2
-        && py + hh/2 > o.y - o.h && py - hh/2 < o.y;
   }
 
   /* ---- particles ---- */
@@ -336,8 +313,8 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- reset ---- */
   function resetGame() {
     score = 0; level = 1; spd = BASE_SPD; elapsed = 0;
-    coneTimer = 0; levelTimer = 0; shootTimer = 0;
-    cones = []; shots = []; particles = [];
+    levelTimer = 0; shootTimer = 0;
+    shots = []; particles = [];
     copShooting = 0;
     P.y = groundY; P.vy = 0; P.grounded = true; P.frameTimer = 0;
     hiScore = parseInt(localStorage.getItem('skaterHiScore') || '0', 10);
@@ -365,7 +342,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (gameState === 'playing') {
       elapsed    += dt;
-      coneTimer  += dt;
       levelTimer += dt;
       shootTimer += dt;
 
@@ -374,10 +350,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // player physics
       P.vy += GRAV * dt; P.y += P.vy * dt; P.frameTimer += dt;
       if (P.y >= groundY) { P.y = groundY; P.vy = 0; P.grounded = true; }
-
-      // spawn cones from right edge
-      const coneInterval = Math.max(1.2, 2.8 - (level - 1) * 0.12);
-      if (coneTimer >= coneInterval) { spawnCone(); coneTimer = 0; }
 
       // cop shoots
       const shootInterval = Math.max(SHOOT_MIN, BASE_SHOOT - (level - 1) * 0.18);
@@ -388,32 +360,19 @@ document.addEventListener('DOMContentLoaded', () => {
         levelTimer = 0; level++; spd = BASE_SPD + (level - 1) * SPD_STEP;
       }
 
-      // move cones
-      for (const o of cones) o.x -= o.spd * dt;
-      cones = cones.filter(o => o.x > -60);
-      for (const o of cones) {
-        if (!o.scored && o.x + o.w/2 < P.x - P.w/2) { o.scored = true; score++; }
-      }
-
-      // move shots (with gravity)
+      // move shots (straight, no gravity)
       for (const s of shots) {
         s.x += s.vx * dt;
-        s.y += s.vy * dt;
-        s.vy += GRAV * 0.55 * dt;
-        if (s.y > groundY) { s.y = groundY; s.vy = 0; }  // bounce-stop on ground
         s.rot += s.rotSpd * dt;
       }
       shots = shots.filter(s => s.x > -40);
       for (const s of shots) {
-        if (!s.scored && s.x + s.r < P.x - P.w/2) { s.scored = true; score++; }
+        if (!s.scored && s.x + s.r < P.x - P.w / 2) { s.scored = true; score++; }
       }
 
       // collision
       let dead = false;
-      for (const o of cones) { if (coneHitsPlayer(o)) { dead = true; break; } }
-      if (!dead) {
-        for (const s of shots) { if (hitsPlayer(s.x, s.y, s.r * 0.85)) { dead = true; break; } }
-      }
+      for (const s of shots) { if (hitsPlayer(s.x, s.y, s.r * 0.82)) { dead = true; break; } }
       if (dead) {
         gameState = 'dead'; burst();
         if (score > hiScore) { hiScore = score; localStorage.setItem('skaterHiScore', hiScore); }
@@ -422,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
       updateParticles(dt);
     }
 
-    for (const o of cones) drawCone(o);
     for (const s of shots) drawShot(s);
     drawParticles();
     if (gameState !== 'dead' || particles.length > 0) drawPlayer();
