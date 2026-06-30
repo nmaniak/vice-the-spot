@@ -39,6 +39,7 @@
     <div class="nav-tabs" role="tablist">
       <button class="nav-tab active" data-page="menu"    role="tab" aria-selected="true"  onclick="switchPage('menu')">Μενού</button>
       <button class="nav-tab"        data-page="gallery" role="tab" aria-selected="false" onclick="switchPage('gallery')">Ο Χώρος μας</button>
+      <button class="nav-tab"        data-page="game"    role="tab" aria-selected="false" onclick="switchPage('game')">Game</button>
       <a class="nav-tab"
          href="https://search.google.com/local/writereview?placeid=ChIJ5QrGMQDTWRMRkhNZM8JuHYw"
          target="_blank"
@@ -391,6 +392,21 @@
 
     </div><!-- /#page-gallery -->
 
+
+    <!-- ══════════════════════════════════
+         PAGE: GAME
+    ══════════════════════════════════ -->
+    <div id="page-game" class="page" role="tabpanel">
+      <div class="hero">
+        <div class="hero-corner hero-corner--left">THE SPOT</div>
+        <div class="hero-corner hero-corner--right">KZN</div>
+        <div class="hero-content"></div>
+      </div>
+      <div class="game-wrap">
+        <canvas id="gameCanvas"></canvas>
+        <p class="game-hint">SPACE / TAP TO JUMP &nbsp;·&nbsp; EAT AS MANY BALLS AS YOU CAN IN 60 SECONDS</p>
+      </div>
+    </div>
 
   </main>
 
