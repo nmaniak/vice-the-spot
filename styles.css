@@ -2,7 +2,7 @@
    CSS CUSTOM PROPERTIES
 ═══════════════════════════════════════ */
 :root {
-  --vice-pink:      #E8215A;
+  --vice-pink:      #DA325E;
   --vice-dark-pink: #C01848;
   --vice-white:     #FFFFFF;
   --vice-bg:        #F5F5F5;
@@ -1244,7 +1244,7 @@ body {
   width: auto;
   height: 100%;
   max-width: 100%;
-  border: 2px solid #E8215A;
+  border: 2px solid var(--vice-pink);
   box-shadow: 0 0 24px rgba(232, 33, 90, 0.35);
   cursor: pointer;
   touch-action: none;
