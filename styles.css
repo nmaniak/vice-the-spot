@@ -78,16 +78,14 @@ body {
   flex-shrink: 0;
 }
 
-/* Drip bar — decorative drips flanking the logo, between the stripe labels */
-.site-drip-bar {
+/* Stripe groups — drip decoration sits right next to THE SPOT / KZN */
+.site-stripe-group {
   position: relative;
   display: flex;
-  flex: 1;
+  align-items: center;
+  gap: 0.35rem;
   min-width: 0;
-  justify-content: center;
-  align-items: flex-start;
   line-height: 0;
-  overflow: hidden;
 }
 
 /* =======================================
@@ -176,12 +174,13 @@ body {
   display: block;
   position: relative;
   z-index: 1;
-  height: 44px;
+  height: 53px;
   width: auto;
-  max-width: 70px;
+  max-width: 84px;
   flex-shrink: 1;
   min-width: 0;
   object-fit: contain;
+  object-position: top;
 }
 .menu-drip-logo-link {
   display: block;
@@ -428,8 +427,11 @@ body {
     font-size: 0.7rem;
   }
   .menu-drip-img {
-    height: 32px;
-    max-width: 40px;
+    height: 38px;
+    max-width: 48px;
+  }
+  .site-stripe-group {
+    gap: 0.25rem;
   }
   .menu-drip-logo {
     height: 32px;
