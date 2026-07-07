@@ -33,9 +33,9 @@
        NAVIGATION
   ══════════════════════════════════ -->
   <nav class="nav" role="navigation" aria-label="Κύρια πλοήγηση">
-    <div class="nav-tabs" role="tablist">
-      <button class="nav-tab active" data-page="menu"    role="tab" aria-selected="true"  onclick="switchPage('menu')">Μενού</button>
-      <button class="nav-tab"        data-page="gallery" role="tab" aria-selected="false" onclick="switchPage('gallery')">Ο Χώρος μας</button>
+    <div class="nav-tabs">
+      <a class="nav-tab active" href="/menu/" aria-current="page">Μενού</a>
+      <a class="nav-tab"        href="/gallery/">Ο Χώρος μας</a>
       <a class="nav-tab"
          href="https://search.google.com/local/writereview?placeid=ChIJ5QrGMQDTWRMRkhNZM8JuHYw"
          target="_blank"
@@ -48,7 +48,7 @@
       <span class="site-stripe-left">THE SPOT</span>
       <img src="images/branding/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left" aria-hidden="true"/>
     </div>
-    <a href="#" class="menu-drip-logo-link" onclick="switchPage('menu'); return false;" aria-label="Vice KZN - Αρχική">
+    <a href="/" class="menu-drip-logo-link" aria-label="Vice KZN - Αρχική">
       <img src="images/branding/vice-logo.png" alt="Vice" class="menu-drip-logo"/>
     </a>
     <div class="site-stripe-group site-stripe-group--right">
@@ -59,10 +59,7 @@
 
   <main>
 
-    <!-- ══════════════════════════════════
-         PAGE: ΜΕΝΟΥ
-    ══════════════════════════════════ -->
-    <div id="page-menu" class="page active" role="tabpanel">
+    <div id="page-menu" class="page active">
 
       <!-- Filter bar -->
       <div class="filter-bar" role="group" aria-label="Φίλτρα κατηγοριών">
@@ -336,65 +333,7 @@
       </div><!-- /.menu-sections -->
     </div><!-- /#page-menu -->
 
-
-    <!-- ══════════════════════════════════
-         PAGE: Ο ΧΩΡΟΣ ΜΑΣ
-    ══════════════════════════════════ -->
-    <div id="page-gallery" class="page" role="tabpanel">
-      <div class="gallery-container">
-        <div class="gallery-grid">
-          <div class="gallery-item gallery-item--featured">
-            <img src="images/our-space/IMG_3719.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3707.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3710.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3722.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3734.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3738.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3739.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3743.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3748.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3749.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3750.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3753.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3758.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-          <div class="gallery-item">
-            <img src="images/our-space/IMG_3761.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy" onclick="openLightbox(this)"/>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </main>
-
-  <div id="lightbox" class="lightbox">
-    <button type="button" class="lightbox-close" aria-label="Κλείσιμο">&times;</button>
-    <img src="" alt="" class="lightbox-img"/>
-  </div>
 
   <footer class="site-footer" aria-label="Footer">
     <img src="images/branding/thespot-graffiti.png" alt="The Spot." class="footer-graffiti" loading="lazy"/>

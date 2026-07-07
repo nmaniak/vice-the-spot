@@ -2,11 +2,359 @@
 <html lang="el">
 <head>
   <meta charset="UTF-8"/>
-  <meta http-equiv="refresh" content="0; url=/"/>
-  <link rel="canonical" href="https://vicethespot.gr/"/>
-  <title>Vice KZN – The Spot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Μενού – Vice KZN – The Spot</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Vice KZN – The Spot. Καφέδες, cocktails και vibes στην Κοζάνη."/>
+  <meta name="keywords" content="vice kzn, cafe kozani, bar kozani, cocktails kozani, coffee kozani, the spot kozani"/>
+  <meta name="theme-color" content="#DA325E"/>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Vice KZN – The Spot"/>
+  <meta property="og:description" content="Καφέδες, cocktails και vibes στην Κοζάνη. Το αγαπημένο σου spot."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:locale" content="el_GR"/>
+  <meta property="og:site_name" content="Vice KZN"/>
+
+  <!-- Favicon (inline SVG) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23DA325E'/%3E%3Ctext x='50%25' y='78%25' text-anchor='middle' font-family='serif' font-weight='bold' font-size='72' fill='white'%3EV%3C/text%3E%3C/svg%3E"/>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Caveat:wght@700&family=Inter:wght@400;500;600;700&family=Permanent+Marker&display=swap" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="../styles.css"/>
 </head>
 <body>
-  <p>Το μενού μετακόμισε στο <a href="/">vicethespot.gr</a>.</p>
+
+  <!-- ══════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════ -->
+  <nav class="nav" role="navigation" aria-label="Κύρια πλοήγηση">
+    <div class="nav-tabs">
+      <a class="nav-tab active" href="/menu/" aria-current="page">Μενού</a>
+      <a class="nav-tab"        href="/gallery/">Ο Χώρος μας</a>
+      <a class="nav-tab"
+         href="https://search.google.com/local/writereview?placeid=ChIJ5QrGMQDTWRMRkhNZM8JuHYw"
+         target="_blank"
+         rel="noopener noreferrer">Αξιολόγηση ↗</a>
+    </div>
+  </nav>
+
+  <div class="site-stripe">
+    <div class="site-stripe-group site-stripe-group--left">
+      <span class="site-stripe-left">THE SPOT</span>
+      <img src="../images/branding/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left" aria-hidden="true"/>
+    </div>
+    <a href="/" class="menu-drip-logo-link" aria-label="Vice KZN - Αρχική">
+      <img src="../images/branding/vice-logo.png" alt="Vice" class="menu-drip-logo"/>
+    </a>
+    <div class="site-stripe-group site-stripe-group--right">
+      <img src="../images/branding/drip_right.png" alt="" class="menu-drip-img menu-drip-img--right" aria-hidden="true"/>
+      <span class="site-stripe-right">KZN</span>
+    </div>
+  </div>
+
+  <main>
+
+    <div id="page-menu" class="page active">
+
+      <!-- Filter bar -->
+      <div class="filter-bar" role="group" aria-label="Φίλτρα κατηγοριών">
+        <button class="filter-btn active" data-filter="all"        onclick="filterMenu(this)">Όλα</button>
+        <button class="filter-btn"        data-filter="coffees"    onclick="filterMenu(this)">COFFEES</button>
+        <button class="filter-btn"        data-filter="chocolates" onclick="filterMenu(this)">CHOCOLATES</button>
+        <button class="filter-btn"        data-filter="tea"        onclick="filterMenu(this)">HOT TEA</button>
+        <button class="filter-btn"        data-filter="soft"       onclick="filterMenu(this)">ΑΝΑΨΥΚΤΙΚΑ</button>
+        <button class="filter-btn"        data-filter="cocktails"  onclick="filterMenu(this)">COCKTAILS</button>
+        <button class="filter-btn"        data-filter="summer"     onclick="filterMenu(this)">SUMMER COCKTAILS</button>
+        <button class="filter-btn"        data-filter="spirits"    onclick="filterMenu(this)">ALCOHOL DRINKS</button>
+      </div>
+
+      <!-- Menu content -->
+      <div class="menu-sections">
+
+        <!-- COFFEES -->
+        <section class="menu-section" data-category="coffees">
+          <h2 class="section-title">COFFEES</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Freddo Espresso</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Freddo Cappuccino</span><span class="item-price">2,80€</span></div>
+            <div class="menu-item"><span class="item-name">Espresso</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Espresso Lungo</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Espresso Ristretto</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Espresso Macchiato</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Espresso Americano</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Cappuccino</span><span class="item-price">2,80€</span></div>
+            <div class="menu-item"><span class="item-name">Cappuccino Latte</span><span class="item-price">2,80€</span></div>
+            <div class="menu-item"><span class="item-name">Flat White</span><span class="item-price">2,80€</span></div>
+            <div class="menu-item"><span class="item-name">Mochaccino</span><span class="item-price">3,20€</span></div>
+            <div class="menu-item"><span class="item-name">Frappe</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Nes Café</span><span class="item-price">2,40€</span></div>
+            <div class="menu-item"><span class="item-name">Ελληνικός</span><span class="item-price">2,20€</span></div>
+            <div class="menu-item"><span class="item-name">Φίλτρου</span><span class="item-price">2,60€</span></div>
+          </div>
+          <p class="section-note" style="margin-top:0.75rem;">Grande +1,00€</p>
+        </section>
+
+        <!-- CHOCOLATES -->
+        <section class="menu-section" data-category="chocolates">
+          <h2 class="section-title">CHOCOLATES</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Classic</span><span class="item-price">2,80€</span></div>
+            <div class="menu-item"><span class="item-name">White</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Kiss</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Salted Caramel</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Bueno</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Black Forest</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Caramelized Hazelnut</span><span class="item-price">3,00€</span></div>
+          </div>
+          <p class="section-note" style="margin-top:0.75rem;">Σιρόπια +0,30€ — φουντούκι, φράουλα, βανίλια, καραμέλα</p>
+        </section>
+
+        <!-- TEA -->
+        <section class="menu-section" data-category="tea">
+          <h2 class="section-title">HOT TEA</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Χαμομήλι</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Βουνού με Μέλι &amp; Λεμόνι</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Φρούτα του Δάσους</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Βουνού με Εσπεριδοειδή</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Μαύρο Τσάι Ρόδι</span><span class="item-price">2,50€</span></div>
+          </div>
+
+          <h2 class="subsection-title">ICE TEA</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Lipton Ροδάκινο</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Lipton Λεμόνι</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Lipton Πράσινο Τσάι <span class="item-badge">low sugar</span></span><span class="item-price">2,50€</span></div>
+          </div>
+        </section>
+
+        <!-- SOFT DRINKS -->
+        <section class="menu-section" data-category="soft">
+          <h2 class="section-title">ΑΝΑΨΥΚΤΙΚΑ</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Pepsi</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Pepsi Max</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">Pepsi Lime <span class="item-badge">sugar free</span></span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Λεμονάδα</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Πορτοκαλάδα</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Soda</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Grapefruit</span><span class="item-price">3,00€</span></div>
+            <div class="menu-item"><span class="item-name">Tsiki Creamy Peach</span><span class="item-price">3,00€</span></div>
+          </div>
+
+          <h2 class="subsection-title">ENERGY DRINKS</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Red Bull</span><span class="item-price">4,00€</span></div>
+            <div class="menu-item"><span class="item-name">Hell</span><span class="item-price">2,50€</span></div>
+          </div>
+
+          <h2 class="subsection-title">WATER</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">Seli 0,5L</span><span class="item-price">0,50€</span></div>
+          </div>
+
+          <h2 class="subsection-title">ΧΥΜΟΙ</h2>
+          <div class="menu-grid">
+            <div class="menu-item"><span class="item-name">ΗΒΗ Πορτοκάλι</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Βύσσινο</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Μπανάνα</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Ροδάκινο</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Ανανάς</span><span class="item-price">2,50€</span></div>
+            <div class="menu-item"><span class="item-name">ΗΒΗ Ανάμεικτος</span><span class="item-price">2,50€</span></div>
+          </div>
+        </section>
+
+        <!-- COCKTAILS -->
+        <section class="menu-section" data-category="cocktails">
+          <h2 class="section-title">COCKTAILS</h2>
+          <div class="menu-grid menu-grid--cocktails">
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Mojito</span><span class="item-ingredients">White rum, lime juice, sugar syrup, mint leaves, soda</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Daiquiri</span><span class="item-ingredients">White rum, lime juice, syrup</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Paloma</span><span class="item-ingredients">Tequila, lime juice, pink soda</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Margarita</span><span class="item-ingredients">Tequila, triple sec, lime juice</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Pornstar</span><span class="item-ingredients">Vodka, passion fruit, vanilla lime</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Cosmopolitan</span><span class="item-ingredients">Vodka, triple sec, lime, cranberry juice</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Old Fashioned</span><span class="item-ingredients">Bourbon, sugar syrup, angostura bitters</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Aperol Spritz</span><span class="item-ingredients">Aperol, prosecco, soda</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Cuba Libre</span><span class="item-ingredients">White rum, cola, lime</span></div>
+              <span class="item-price">6,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Negroni</span><span class="item-ingredients">Campari, gin, Otto's Athens Vermouth</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Apple Martini</span><span class="item-ingredients">Vodka, apple, lime, syrup</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Mai Tai</span><span class="item-ingredients">White rum, dark rum, triple sec, orgeat syrup, lime, angostura bitters</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Zombie</span><span class="item-ingredients">White rum, black rum, lime, passion, pineapple, grenadine, angostura bitters</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Disaronno Sour</span><span class="item-ingredients">Disaronno, syrup, lime</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Skinos Sour</span><span class="item-ingredients">Skinos Mastiha Spirit, syrup, lime</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Espresso Martini</span><span class="item-ingredients">Skinos dark, espresso, vanilla syrup</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SUMMER COCKTAILS -->
+        <section class="menu-section" data-category="summer">
+          <h2 class="section-title">SUMMER COCKTAILS</h2>
+          <div class="menu-grid menu-grid--cocktails">
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Tropical Haze</span><span class="item-ingredients">Vodka, apple puree, pineapple puree, lime juice</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Drama Queen</span><span class="item-ingredients">White rum, passion puree, cucumber syrup, lime juice</span></div>
+              <span class="item-price">7,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Grand Prix</span><span class="item-ingredients">Engine gin, melon puree, coconut syrup, lime juice</span></div>
+              <span class="item-price">8,00€</span>
+            </div>
+            <div class="menu-item menu-item--cocktail">
+              <div><span class="item-name">Katsiki</span><span class="item-ingredients">Disaronno Amaretto, Skinos Mastiha Spirit, orgeat syrup, Tsiki Cream Peach, lime juice</span></div>
+              <span class="item-price">9,00€</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SPIRITS -->
+        <section class="menu-section" data-category="spirits">
+          <h2 class="section-title">ALCOHOL DRINKS</h2>
+          <div class="spirits-grid">
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Μπύρες</h3>
+              <div class="menu-item"><span class="item-name">EZA Lager Draft</span><span class="item-price">3,00€</span></div>
+              <div class="menu-item"><span class="item-name">Alcohol Free</span><span class="item-price">3,00€</span></div>
+              <div class="menu-item"><span class="item-name">Radler</span><span class="item-price">3,00€</span></div>
+              <div class="menu-item"><span class="item-name">A Toda Madre</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Somersby Watermelon</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Somersby Apple</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Somersby Strawberry Lime <span class="item-badge">0%</span></span><span class="item-price">5,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Vodka</h3>
+              <div class="menu-item"><span class="item-name">Serkova</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Stolichnaya</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Belvedere</span><span class="item-price">9,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Whiskey</h3>
+              <div class="menu-item"><span class="item-name">Haig</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Four Roses</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Jameson</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Tullamore Dew</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Jack Daniel's</span><span class="item-price">8,00€</span></div>
+              <div class="menu-item"><span class="item-name">Jameson Black Barrel</span><span class="item-price">8,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Gin</h3>
+              <div class="menu-item"><span class="item-name">Empire</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Beefeater</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Tanqueray</span><span class="item-price">7,00€</span></div>
+              <div class="menu-item"><span class="item-name">Bombay</span><span class="item-price">7,00€</span></div>
+              <div class="menu-item"><span class="item-name">Hendrick's</span><span class="item-price">9,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Rum</h3>
+              <div class="menu-item"><span class="item-name">Nusa Cana White</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Nusa Cana Dark</span><span class="item-price">5,00€</span></div>
+              <div class="menu-item"><span class="item-name">Sailor Jerry</span><span class="item-price">6,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Tequila</h3>
+              <div class="menu-item"><span class="item-name">Jose Cuervo White</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Jose Curvo Gold</span><span class="item-price">6,00€</span></div>
+            </div>
+
+            <div class="spirits-category">
+              <h3 class="spirits-cat-title">Others</h3>
+              <div class="menu-item"><span class="item-name">Jägermeister</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Malibu</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Campari</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Skinos Mastiha</span><span class="item-price">6,00€</span></div>
+              <div class="menu-item"><span class="item-name">Disaronno</span><span class="item-price">6,00€</span></div>
+            </div>
+
+          </div>
+        </section>
+
+      </div><!-- /.menu-sections -->
+    </div><!-- /#page-menu -->
+
+  </main>
+
+  <footer class="site-footer" aria-label="Footer">
+    <img src="../images/branding/thespot-graffiti.png" alt="The Spot." class="footer-graffiti" loading="lazy"/>
+    <div class="footer-socials">
+      <a href="https://www.facebook.com/p/Vicekzn-61571378348129/"
+         target="_blank" rel="noopener noreferrer"
+         class="footer-social-icon" aria-label="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </a>
+      <a href="https://www.instagram.com/vice.kzn/?hl=el"
+         target="_blank" rel="noopener noreferrer"
+         class="footer-social-icon" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26" aria-hidden="true">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+      </a>
+    </div>
+  </footer>
+
+  <script src="../script.js"></script>
 </body>
 </html>

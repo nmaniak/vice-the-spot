@@ -1,22 +1,4 @@
 /* =======================================
-   PAGE SWITCHING
-======================================= */
-function switchPage(pageId) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => {
-    t.classList.remove('active');
-    t.setAttribute('aria-selected', 'false');
-  });
-
-  const page = document.getElementById('page-' + pageId);
-  const tab  = document.querySelector(`.nav-tab[data-page="${pageId}"]`);
-  if (page) page.classList.add('active');
-  if (tab)  { tab.classList.add('active'); tab.setAttribute('aria-selected', 'true'); }
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-/* =======================================
    MENU FILTER
 ======================================= */
 function filterMenu(btn) {
@@ -48,6 +30,7 @@ function closeLightbox() {
 
 document.addEventListener('DOMContentLoaded', () => {
   const lightbox = document.getElementById('lightbox');
+  if (!lightbox) return;
   lightbox.addEventListener('click', e => {
     if (e.target === lightbox || e.target.classList.contains('lightbox-close')) closeLightbox();
   });
