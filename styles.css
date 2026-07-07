@@ -16,6 +16,7 @@
   --shadow-hover:   0 6px 24px rgba(232, 33, 90, 0.18);
   --transition:     0.2s ease;
   --nav-height:     58px;
+  --stripe-height:  64px;
 }
 
 /* ═══════════════════════════════════════
@@ -50,7 +51,6 @@ body {
   color: var(--vice-text);
   line-height: 1.6;
   min-height: 100vh;
-  overflow-x: hidden;
   width: 100%;
 }
 
@@ -58,8 +58,9 @@ body {
    SITE STRIPE
 ======================================= */
 .site-stripe {
-  position: relative;
-  z-index: 2;
+  position: sticky;
+  top: 0;
+  z-index: 99;
   background: var(--vice-pink);
   display: flex;
   align-items: center;
@@ -92,8 +93,7 @@ body {
    NAV
 ======================================= */
 .nav {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 100;
   background: var(--vice-pink);
   display: flex;
@@ -174,9 +174,9 @@ body {
   display: block;
   position: relative;
   z-index: 1;
-  height: 53px;
+  height: 64px;
   width: auto;
-  max-width: 84px;
+  max-width: 101px;
   flex-shrink: 1;
   min-width: 0;
   object-fit: contain;
@@ -199,7 +199,7 @@ body {
 
 /* Filter bar on pink bg */
 #page-menu .filter-bar {
-  background: rgba(0,0,0,0.2);
+  background: #AE284B;
   border-bottom: none;
 }
 #page-menu .filter-btn {
@@ -403,6 +403,9 @@ body {
 
 /* Mobile */
 @media (max-width: 600px) {
+  :root {
+    --stripe-height: 46px;
+  }
   #page-menu .menu-grid,
   #page-menu .spirits-grid {
     grid-template-columns: 1fr;
@@ -427,8 +430,8 @@ body {
     font-size: 0.7rem;
   }
   .menu-drip-img {
-    height: 38px;
-    max-width: 48px;
+    height: 46px;
+    max-width: 58px;
   }
   .site-stripe-group {
     gap: 0.25rem;
@@ -494,7 +497,7 @@ body {
 ═══════════════════════════════════════ */
 .filter-bar {
   position: sticky;
-  top: var(--nav-height);
+  top: var(--stripe-height);
   z-index: 50;
   background: var(--vice-card);
   border-bottom: 1px solid var(--vice-border);
@@ -1136,7 +1139,6 @@ body {
 
   .filter-bar {
     padding: 0.7rem 1rem;
-    top: var(--nav-height);
   }
 
   .filter-btn {
@@ -1202,11 +1204,62 @@ body {
   height: 100%;
   object-fit: cover;
   display: block;
+  cursor: pointer;
   transition: transform 0.4s ease;
 }
 
 .gallery-item:hover img {
   transform: scale(1.06);
+}
+
+/* =======================================
+   LIGHTBOX
+======================================= */
+.lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.9);
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.25rem;
+}
+
+.lightbox.active {
+  display: flex;
+}
+
+.lightbox-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 1rem;
+  right: 1.25rem;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--vice-white);
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition);
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 @media (max-width: 700px) {

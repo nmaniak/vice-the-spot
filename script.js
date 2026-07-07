@@ -29,9 +29,51 @@ function filterMenu(btn) {
 }
 
 /* =======================================
+   LIGHTBOX
+======================================= */
+function openLightbox(imgEl) {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = lightbox.querySelector('.lightbox-img');
+  lightboxImg.src = imgEl.src;
+  lightboxImg.alt = imgEl.alt;
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const lightbox = document.getElementById('lightbox');
+  lightbox.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const lightbox = document.getElementById('lightbox');
+  lightbox.addEventListener('click', e => {
+    if (e.target === lightbox || e.target.classList.contains('lightbox-close')) closeLightbox();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+});
+
+/* =======================================
+   STICKY HEADER HEIGHT SYNC
+   Keeps the filter bar's sticky offset pixel-exact
+   with the real rendered height of the drip header,
+   avoiding a seam between the two sticky bars.
+======================================= */
+function syncStripeHeight() {
+  const stripe = document.querySelector('.site-stripe');
+  if (stripe) document.documentElement.style.setProperty('--stripe-height', stripe.offsetHeight + 'px');
+}
+window.addEventListener('load', syncStripeHeight);
+window.addEventListener('resize', syncStripeHeight);
+
+/* =======================================
    INTERSECTION OBSERVER - fade-in on scroll
 ======================================= */
 document.addEventListener('DOMContentLoaded', () => {
+  syncStripeHeight();
   const style = document.createElement('style');
   style.textContent = `
     .reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.4s ease, transform 0.4s ease; }
