@@ -33,12 +33,8 @@
        NAVIGATION
   ══════════════════════════════════ -->
   <nav class="nav" role="navigation" aria-label="Κύρια πλοήγηση">
-    <a href="#" class="nav-logo" onclick="switchPage('menu'); return false;" aria-label="Vice KZN - Αρχική">
-      <img src="assets/images/vice-logo.png" alt="Vice" class="nav-logo-img"/>
-    </a>
     <div class="nav-tabs" role="tablist">
       <button class="nav-tab active" data-page="menu"    role="tab" aria-selected="true"  onclick="switchPage('menu')">Μενού</button>
-      <button class="nav-tab"        data-page="gallery" role="tab" aria-selected="false" onclick="switchPage('gallery')">Ο Χώρος μας</button>
       <button class="nav-tab"        data-page="game"    role="tab" aria-selected="false" onclick="switchPage('game')">Game</button>
       <a class="nav-tab"
          href="https://search.google.com/local/writereview?placeid=ChIJ5QrGMQDTWRMRkhNZM8JuHYw"
@@ -60,21 +56,24 @@
     <div id="page-menu" class="page active" role="tabpanel">
 
       <!-- Drip header -->
-      <div class="menu-drip-bar" aria-hidden="true">
-        <img src="assets/images/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left"/>
-        <img src="assets/images/drip_right.png" alt="" class="menu-drip-img menu-drip-img--right"/>
+      <div class="menu-drip-bar">
+        <img src="assets/images/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left" aria-hidden="true"/>
+        <a href="#" class="menu-drip-logo-link" onclick="switchPage('menu'); return false;" aria-label="Vice KZN - Αρχική">
+          <img src="assets/images/vice-logo.png" alt="Vice" class="menu-drip-logo"/>
+        </a>
+        <img src="assets/images/drip_right.png" alt="" class="menu-drip-img menu-drip-img--right" aria-hidden="true"/>
       </div>
 
       <!-- Filter bar -->
       <div class="filter-bar" role="group" aria-label="Φίλτρα κατηγοριών">
         <button class="filter-btn active" data-filter="all"        onclick="filterMenu(this)">Όλα</button>
-        <button class="filter-btn"        data-filter="coffees"    onclick="filterMenu(this)">Καφέδες</button>
-        <button class="filter-btn"        data-filter="chocolates" onclick="filterMenu(this)">Σοκολάτες</button>
-        <button class="filter-btn"        data-filter="tea"        onclick="filterMenu(this)">Τσάι</button>
-        <button class="filter-btn"        data-filter="soft"       onclick="filterMenu(this)">Αναψυκτικά</button>
-        <button class="filter-btn"        data-filter="cocktails"  onclick="filterMenu(this)">Cocktails</button>
-        <button class="filter-btn"        data-filter="summer"     onclick="filterMenu(this)">Summer Cocktails</button>
-        <button class="filter-btn"        data-filter="spirits"    onclick="filterMenu(this)">Spirits</button>
+        <button class="filter-btn"        data-filter="coffees"    onclick="filterMenu(this)">COFFEES</button>
+        <button class="filter-btn"        data-filter="chocolates" onclick="filterMenu(this)">CHOCOLATES</button>
+        <button class="filter-btn"        data-filter="tea"        onclick="filterMenu(this)">HOT TEA</button>
+        <button class="filter-btn"        data-filter="soft"       onclick="filterMenu(this)">ΑΝΑΨΥΚΤΙΚΑ</button>
+        <button class="filter-btn"        data-filter="cocktails"  onclick="filterMenu(this)">COCKTAILS</button>
+        <button class="filter-btn"        data-filter="summer"     onclick="filterMenu(this)">SUMMER COCKTAILS</button>
+        <button class="filter-btn"        data-filter="spirits"    onclick="filterMenu(this)">ALCOHOL DRINKS</button>
       </div>
 
       <!-- Menu content -->
@@ -83,7 +82,6 @@
         <!-- COFFEES -->
         <section class="menu-section" data-category="coffees">
           <h2 class="section-title">COFFEES</h2>
-          <p class="section-note">Grande +1,00€</p>
           <div class="menu-grid">
             <div class="menu-item"><span class="item-name">Freddo Espresso</span><span class="item-price">2,40€</span></div>
             <div class="menu-item"><span class="item-name">Freddo Cappuccino</span><span class="item-price">2,80€</span></div>
@@ -101,7 +99,7 @@
             <div class="menu-item"><span class="item-name">Ελληνικός</span><span class="item-price">2,20€</span></div>
             <div class="menu-item"><span class="item-name">Φίλτρου</span><span class="item-price">2,60€</span></div>
           </div>
-          <p class="section-note" style="margin-top:0.75rem;">Σιρόπια +0,30€ — φουντούκι, φράουλα, βανίλια, καραμέλα</p>
+          <p class="section-note" style="margin-top:0.75rem;">Grande +1,00€</p>
         </section>
 
         <!-- CHOCOLATES -->
@@ -337,55 +335,6 @@
 
       </div><!-- /.menu-sections -->
     </div><!-- /#page-menu -->
-
-
-    <!-- ══════════════════════════════════
-         PAGE: ΓΚΑΛΕΡΙ
-    ══════════════════════════════════ -->
-    <div id="page-gallery" class="page" role="tabpanel">
-
-      <!-- Gallery Grid -->
-      <div class="gallery-container">
-        <div class="gallery-grid">
-          <!-- Featured cell (2×2) — replace div.gallery-placeholder with <img src="assets/images/bar.jpg" alt="The Bar" loading="lazy"> -->
-          <div class="gallery-item gallery-item--featured" aria-label="THE BAR">
-            <div class="gallery-placeholder">🍹</div>
-            <div class="gallery-overlay"><span>THE BAR</span></div>
-          </div>
-          <!-- Cell 2 -->
-          <div class="gallery-item" aria-label="VIBES">
-            <div class="gallery-placeholder">🎵</div>
-            <div class="gallery-overlay"><span>VIBES</span></div>
-          </div>
-          <!-- Cell 3 -->
-          <div class="gallery-item" aria-label="NIGHTS">
-            <div class="gallery-placeholder">🌙</div>
-            <div class="gallery-overlay"><span>NIGHTS</span></div>
-          </div>
-          <!-- Cell 4 -->
-          <div class="gallery-item" aria-label="COFFEE">
-            <div class="gallery-placeholder">☕</div>
-            <div class="gallery-overlay"><span>COFFEE</span></div>
-          </div>
-          <!-- Cell 5 -->
-          <div class="gallery-item" aria-label="SPACE">
-            <div class="gallery-placeholder">🪴</div>
-            <div class="gallery-overlay"><span>SPACE</span></div>
-          </div>
-          <!-- Cell 6 -->
-          <div class="gallery-item" aria-label="EVENTS">
-            <div class="gallery-placeholder">🎉</div>
-            <div class="gallery-overlay"><span>EVENTS</span></div>
-          </div>
-          <!-- Cell 7 -->
-          <div class="gallery-item" aria-label="MORNING">
-            <div class="gallery-placeholder">🌅</div>
-            <div class="gallery-overlay"><span>MORNING</span></div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /#page-gallery -->
 
 
     <!-- ══════════════════════════════════

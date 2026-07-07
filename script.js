@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { threshold: 0.08 }
   );
 
-  document.querySelectorAll('.menu-section, .gallery-item, .rating-summary, .review-card, .write-review').forEach(el => {
+  document.querySelectorAll('.menu-section, .rating-summary, .review-card, .write-review').forEach(el => {
     el.classList.add('reveal');
     observer.observe(el);
   });
