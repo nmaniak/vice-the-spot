@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Skate Game</title>
+<style>
+  /* =======================================
+     RESET & BASE
+  ======================================= */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0d0d12;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  /* Outer layout: header, game stage, footer stacked vertically.
+     This whole block is what goes fullscreen. */
+  #appRoot {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: #0d0d12;
+  }
+
+  /* =======================================
+     HEADER / FOOTER (kept minimal so the canvas gets max room)
+  ======================================= */
+  #gameHeader, #gameFooter {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffe14d;
+    background: #16161d;
+    font-family: 'Impact', 'Arial Narrow', sans-serif;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  #gameHeader {
+    height: 44px;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 0 #d92662;
+    border-bottom: 2px solid #d92662;
+  }
+  #gameFooter {
+    height: 30px;
+    font-size: 0.65rem;
+    color: #9a9aa5;
+    letter-spacing: 1px;
+    border-top: 2px solid #2a2a35;
+  }
+
+  /* =======================================
+     GAME STAGE — the flexible middle area that centers the canvas
+     and enforces the 16:9 letterbox via JS-computed pixel sizes
+  ======================================= */
+  #stageWrap {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0; /* allow flexbox to actually shrink this on small screens */
+    position: relative;
+    background: #0d0d12;
+  }
+
+  #gameStage {
+    position: relative;
+    background: #000;
+    box-shadow: 0 0 0 2px #2a2a35, 0 10px 40px rgba(0,0,0,0.6);
+  }
+
+  #gameCanvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* =======================================
+     FULLSCREEN BUTTON — overlays the top-right corner of the canvas
+  ======================================= */
+  #fullscreenBtn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 6px;
+    border: 2px solid #ffe14d;
+    background: rgba(13,13,18,0.65);
+    color: #ffe14d;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
+  #fullscreenBtn:active { background: rgba(217,38,98,0.65); }
+
+  /* =======================================
+     OVERLAYS — start screen / game over screen
+  ======================================= */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background: rgba(10,10,14,0.82);
+    color: #fff;
+    text-align: center;
+    font-family: 'Impact', 'Arial Narrow', sans-serif;
+    z-index: 10;
+    padding: 5%;
+  }
+  .overlay.hidden { display: none; }
+  .overlay h1 {
+    font-size: clamp(1.6rem, 6vw, 3rem);
+    color: #ffe14d;
+    text-shadow: 3px 3px 0 #d92662;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .overlay p {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: clamp(0.8rem, 2.4vw, 1.05rem);
+    color: #cfcfd8;
+    letter-spacing: 1px;
+  }
+  .overlay .scoreLine {
+    font-size: clamp(1rem, 3vw, 1.4rem);
+    color: #fff;
+  }
+  .overlay .newHigh {
+    color: #4dffb8;
+    text-shadow: 2px 2px 0 #0d0d12;
+  }
+  .overlay .btn {
+    margin-top: 8px;
+    padding: 10px 26px;
+    background: #d92662;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-family: 'Impact', 'Arial Narrow', sans-serif;
+    font-size: clamp(0.9rem, 2.6vw, 1.1rem);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #8f1a44;
+  }
+  .overlay .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #8f1a44; }
+
+  /* =======================================
+     RESPONSIVE — short/landscape screens (mobile landscape) get a
+     tighter header/footer so the canvas keeps the most vertical room
+  ======================================= */
+  @media (max-height: 480px) {
+    #gameHeader { height: 28px; font-size: 0.8rem; }
+    #gameFooter { height: 20px; font-size: 0.55rem; }
+  }
+  @media (max-height: 360px) {
+    #gameHeader, #gameFooter { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="appRoot">
+
+  <header id="gameHeader"></header>
+
+  <div id="stageWrap">
+    <div id="gameStage">
+      <canvas id="gameCanvas"></canvas>
+
+      <button id="fullscreenBtn" type="button" aria-label="Toggle fullscreen">⛶</button>
+
+      <!-- START SCREEN -->
+      <div id="startOverlay" class="overlay">
+        <p class="scoreLine">High Score: <span id="startHighScore">0</span></p>
+        <button id="startBtn" class="btn" type="button">Tap to Start</button>
+      </div>
+
+      <!-- GAME OVER SCREEN -->
+      <div id="gameOverOverlay" class="overlay hidden">
+        <h1>Busted!</h1>
+        <p class="scoreLine">Score: <span id="finalScore">0</span></p>
+        <p class="scoreLine">High Score: <span id="finalHighScore">0</span></p>
+        <p id="newHighMsg" class="newHigh hidden">NEW HIGH SCORE!</p>
+        <button id="restartBtn" class="btn" type="button">Tap to Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <footer id="gameFooter"></footer>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* =======================================================
+     LOGICAL RESOLUTION
+     Every gameplay number (positions, speeds, gravity, sizes)
+     is expressed in this fixed 16:9 coordinate space. The canvas
+     is scaled visually to fit the device, but the game itself
+     never knows or cares what the real screen size is — that's
+     what keeps physics identical across devices.
+  ========================================================== */
+  const GAME_W = 1280;
+  const GAME_H = 720;
+  const ASPECT = GAME_W / GAME_H;
+  const GROUND_Y = 560; // y coordinate of the ground line
+
+  /* =======================================================
+     DOM REFERENCES
+  ========================================================== */
+  const stageWrap   = document.getElementById('stageWrap');
+  const stage        = document.getElementById('gameStage');
+  const canvas        = document.getElementById('gameCanvas');
+  const ctx            = canvas.getContext('2d');
+  const appRoot         = document.getElementById('appRoot');
+  const fullscreenBtn    = document.getElementById('fullscreenBtn');
+  const startOverlay      = document.getElementById('startOverlay');
+  const startBtn            = document.getElementById('startBtn');
+  const startHighScoreEl     = document.getElementById('startHighScore');
+  const gameOverOverlay        = document.getElementById('gameOverOverlay');
+  const restartBtn               = document.getElementById('restartBtn');
+  const finalScoreEl               = document.getElementById('finalScore');
+  const finalHighScoreEl             = document.getElementById('finalHighScore');
+  const newHighMsg                     = document.getElementById('newHighMsg');
+
+  /* =======================================================
+     RESPONSIVE LETTERBOXING
+     Fit #gameStage into #stageWrap at the largest size that still
+     keeps a strict 16:9 ratio, then size the canvas's internal
+     pixel buffer for the device's pixel ratio (crisp on retina).
+  ========================================================== */
+  function resize() {
+    const availW = stageWrap.clientWidth;
+    const availH = stageWrap.clientHeight;
+
+    let w = availW;
+    let h = w / ASPECT;
+    if (h > availH) {
+      h = availH;
+      w = h * ASPECT;
+    }
+
+    stage.style.width  = Math.floor(w) + 'px';
+    stage.style.height = Math.floor(h) + 'px';
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = Math.floor(GAME_W * dpr);
+    canvas.height = Math.floor(GAME_H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in logical GAME_W/GAME_H units
+  }
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', resize);
+  document.addEventListener('fullscreenchange', resize);
+  document.addEventListener('webkitfullscreenchange', resize);
+  resize();
+
+  /* =======================================================
+     FULLSCREEN TOGGLE
+  ========================================================== */
+  fullscreenBtn.addEventListener('click', () => {
+    const isFs = document.fullscreenElement || document.webkitFullscreenElement;
+    if (!isFs) {
+      (appRoot.requestFullscreen || appRoot.webkitRequestFullscreen || function(){}).call(appRoot);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+    }
+    setTimeout(resize, 100); // resize after the browser finishes the FS transition
+  });
+
+  /* =======================================================
+     ASSET LOADING
+     Roll + jump sprite sequences. If any image fails (missing
+     file, blocked, etc.) we fall back to drawing a simple yellow
+     rectangle skater so the game is always playable.
+  ========================================================== */
+  const ASSET_PATH = 'images/game/';
+  const rollFrames = [];
+  const jumpFrames = [];
+  let assetsFailed = false;
+  let assetsToLoad = 12;
+  let assetsLoaded = 0;
+
+  function loadFrame(name) {
+    const img = new Image();
+    img.src = ASSET_PATH + name;
+    img.onload  = () => { assetsLoaded++; };
+    img.onerror = () => { assetsFailed = true; assetsLoaded++; };
+    return img;
+  }
+  for (let i = 1; i <= 6; i++) rollFrames.push(loadFrame('rolling_' + i + '.png'));
+  for (let i = 1; i <= 6; i++) jumpFrames.push(loadFrame('jumping_' + i + '.png'));
+
+  function spritesReady() {
+    return assetsLoaded >= assetsToLoad && !assetsFailed;
+  }
+
+  // the single ground obstacle (crushed can) — loaded separately so a
+  // failure here doesn't affect the skater sprite fallback logic
+  let canImageOk = false;
+  const canImage = new Image();
+  canImage.src = ASSET_PATH + 'obstacle.png';
+  canImage.onload  = () => { canImageOk = true; };
+  canImage.onerror = () => { canImageOk = false; };
+
+  /* =======================================================
+     GAME CONSTANTS (all in logical GAME_W/GAME_H units)
+  ========================================================== */
+  const GRAVITY        = 3600;   // px/s^2
+  const JUMP_VELOCITY   = -1300; // px/s, negative = upward
+  const BASE_SPEED       = 480;  // world scroll speed at level 1, px/s
+  const MAX_SPEED          = 1400;
+  const LEVEL_DURATION       = 20;   // seconds per level
+  const LEVEL_SPEED_GROWTH     = 0.10; // +10% world speed per level
+  const BASE_SPAWN_INTERVAL      = 1.4; // seconds between obstacles at level 1
+  const MIN_SPAWN_INTERVAL         = 0.55;
+  const ROLL_FPS = 12;
+  const JUMP_ANIM_DURATION = 0.72; // roughly matches the jump's total air time
+
+  const SKATER_X       = 190;    // fixed screen x — the world scrolls, not the skater
+  const SKATER_H        = 170;
+  const SKATER_HEAD_Y = GROUND_Y - SKATER_H; // top of a standing skater's head
+  const HIGH_CAN_GAP = 12; // clearance above the head a standing skater gets
+
+  const HIGH_SCORE_KEY = 'streetRunnerHighScore';
+
+  /* =======================================================
+     GAME STATE
+  ========================================================== */
+  let state = 'start'; // 'start' | 'playing' | 'gameover'
+  let lastTs = null;
+  let score = 0;         // +1 per obstacle successfully avoided
+  let highScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY) || '0', 10);
+  let elapsed = 0;        // seconds survived this run — drives the level/speed
+  let level = 1;
+  let worldSpeed = BASE_SPEED;
+  let spawnTimer = 0;
+  let groundOffset = 0;
+
+  const skater = {
+    y: GROUND_Y,       // y of the skater's feet (bottom anchor)
+    vy: 0,
+    grounded: true,
+    airTime: 0,
+    rollTime: 0,        // accumulates while rolling, drives frame selection
+  };
+
+  let obstacles = []; // { type, x, w, h, rot }
+  let particles = [];  // simple burst effect on crash
+
+  startHighScoreEl.textContent = highScore;
+
+  /* =======================================================
+     INPUT
+     Space / click / tap:
+       - on 'start' or 'gameover' -> (re)start the run
+       - on 'playing' -> ollie (jump) if grounded
+  ========================================================== */
+  function handleAction() {
+    if (state === 'start') { startGame(); return; }
+    if (state === 'gameover') { startGame(); return; }
+    if (state === 'playing' && skater.grounded) {
+      skater.vy = JUMP_VELOCITY;
+      skater.grounded = false;
+      skater.airTime = 0;
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); handleAction(); }
+  });
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.target === fullscreenBtn) return;
+    handleAction();
+  });
+  startBtn.addEventListener('click', handleAction);
+  restartBtn.addEventListener('click', handleAction);
+
+  /* =======================================================
+     OBSTACLE DEFINITIONS
+     The crushed can is the only obstacle. Each spawn is randomly
+     either:
+       - 'low'  — rolls along the ground, must be jumped over
+       - 'high' — flies at head height; a grounded skater clears it,
+                  but jumping into its path is a hit
+  ========================================================== */
+  const CAN_W = 62;
+
+  function spawnObstacle() {
+    // recompute height ratio lazily in case the image finished loading after this ran once
+    const h = canImageOk ? CAN_W * (canImage.naturalHeight / canImage.naturalWidth) : CAN_W * 0.72;
+    const variant = Math.random() < 0.5 ? 'low' : 'high';
+    obstacles.push({ type: 'can', variant, x: GAME_W + CAN_W, w: CAN_W, h, rot: 0 });
+  }
+
+  /* =======================================================
+     UPDATE
+  ========================================================== */
+  function update(dt) {
+    // --- level & difficulty scaling: +10% speed every LEVEL_DURATION seconds ---
+    elapsed += dt;
+    level = 1 + Math.floor(elapsed / LEVEL_DURATION);
+    worldSpeed = Math.min(MAX_SPEED, BASE_SPEED * Math.pow(1 + LEVEL_SPEED_GROWTH, level - 1));
+    const spawnInterval = Math.max(MIN_SPAWN_INTERVAL, BASE_SPAWN_INTERVAL - (level - 1) * 0.08);
+
+    // --- ground scroll (score is earned per obstacle avoided, not by time) ---
+    groundOffset -= worldSpeed * dt;
+
+    // --- skater physics ---
+    if (!skater.grounded) {
+      skater.vy += GRAVITY * dt;
+      skater.y  += skater.vy * dt;
+      skater.airTime += dt;
+      if (skater.y >= GROUND_Y) {
+        skater.y = GROUND_Y;
+        skater.vy = 0;
+        skater.grounded = true;
+        skater.rollTime = 0; // reset roll animation to frame 1 on landing
+      }
+    } else {
+      skater.rollTime += dt;
+    }
+
+    // --- spawn obstacles ---
+    spawnTimer -= dt;
+    if (spawnTimer <= 0) {
+      spawnObstacle();
+      spawnTimer = spawnInterval * (0.85 + Math.random() * 0.3);
+    }
+
+    // --- move obstacles, check offscreen, check collision ---
+    const skaterBox = getSkaterHitbox();
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      const o = obstacles[i];
+      o.x -= worldSpeed * dt;
+      o.rot += (worldSpeed / (o.w * 0.5)) * dt; // tumble, speed-linked
+
+      if (o.x + o.w < -20) { obstacles.splice(i, 1); score++; continue; }
+
+      const box = getObstacleHitbox(o);
+      if (aabbOverlap(skaterBox, box)) {
+        crash();
+        return;
+      }
+    }
+  }
+
+  function getSkaterHitbox() {
+    // slightly inset from the visual sprite box for a fairer feel
+    const w = skaterDrawWidth();
+    const h = SKATER_H;
+    const x = SKATER_X - w / 2 + w * 0.18;
+    const y = skater.y - h;
+    return { x, y, w: w * 0.64, h: h * 0.82 };
+  }
+
+  function getObstacleHitbox(o) {
+    if (o.variant === 'high') {
+      // flies just above a standing skater's head — only a threat if you jump into it
+      const bottom = SKATER_HEAD_Y - HIGH_CAN_GAP;
+      return { x: o.x - o.w / 2, y: bottom - o.h, w: o.w, h: o.h };
+    }
+    // 'low' — rolls along the ground, must be jumped over
+    return { x: o.x - o.w / 2, y: GROUND_Y - o.h, w: o.w, h: o.h };
+  }
+
+  function aabbOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  }
+
+  function skaterDrawWidth() {
+    // preserve each frame's natural aspect ratio at a fixed draw height
+    const frame = currentSkaterFrame();
+    if (frame && frame.naturalWidth) {
+      return SKATER_H * (frame.naturalWidth / frame.naturalHeight);
+    }
+    return SKATER_H * 0.68; // fallback rectangle aspect
+  }
+
+  function currentSkaterFrame() {
+    if (!spritesReady()) return null;
+    if (skater.grounded) {
+      const idx = Math.floor(skater.rollTime * ROLL_FPS) % 6;
+      return rollFrames[idx];
+    }
+    const progress = Math.min(skater.airTime / JUMP_ANIM_DURATION, 0.999);
+    const idx = Math.floor(progress * 6);
+    return jumpFrames[Math.min(idx, 5)];
+  }
+
+  function crash() {
+    state = 'gameover';
+    if (score > highScore) {
+      highScore = Math.floor(score);
+      localStorage.setItem(HIGH_SCORE_KEY, highScore);
+      newHighMsg.classList.remove('hidden');
+    } else {
+      newHighMsg.classList.add('hidden');
+    }
+    finalScoreEl.textContent = Math.floor(score);
+    finalHighScoreEl.textContent = highScore;
+    gameOverOverlay.classList.remove('hidden');
+  }
+
+  function startGame() {
+    state = 'playing';
+    score = 0;
+    elapsed = 0;
+    level = 1;
+    worldSpeed = BASE_SPEED;
+    spawnTimer = BASE_SPAWN_INTERVAL;
+    obstacles = [];
+    skater.y = GROUND_Y;
+    skater.vy = 0;
+    skater.grounded = true;
+    skater.airTime = 0;
+    skater.rollTime = 0;
+    startOverlay.classList.add('hidden');
+    gameOverOverlay.classList.add('hidden');
+  }
+
+  /* =======================================================
+     DRAW
+  ========================================================== */
+  function drawBackground() {
+    // sky
+    const sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+    sky.addColorStop(0, '#241b33');
+    sky.addColorStop(1, '#4a2545');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, GAME_W, GROUND_Y);
+
+    // distant "buildings" skyline, parallax-scrolled slower than the ground
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    const parX = (groundOffset * 0.25) % 160;
+    for (let x = parX - 160; x < GAME_W + 160; x += 160) {
+      ctx.fillRect(x, GROUND_Y - 180, 90, 180);
+      ctx.fillRect(x + 100, GROUND_Y - 130, 50, 130);
+    }
+
+    // ground / sidewalk
+    ctx.fillStyle = '#3a3a44';
+    ctx.fillRect(0, GROUND_Y, GAME_W, GAME_H - GROUND_Y);
+
+    // scrolling sidewalk seams
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 3;
+    const seamGap = 140;
+    const off = ((groundOffset % seamGap) + seamGap) % seamGap;
+    for (let x = -off; x < GAME_W; x += seamGap) {
+      ctx.beginPath();
+      ctx.moveTo(x, GROUND_Y + 6);
+      ctx.lineTo(x - 20, GAME_H);
+      ctx.stroke();
+    }
+
+    // curb line
+    ctx.fillStyle = '#ffe14d';
+    ctx.fillRect(0, GROUND_Y, GAME_W, 4);
+  }
+
+  function drawSkater() {
+    const w = skaterDrawWidth();
+    const h = SKATER_H;
+    const x = SKATER_X - w / 2;
+    const y = skater.y - h;
+    const frame = currentSkaterFrame();
+
+    ctx.save();
+    // contact shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.beginPath();
+    ctx.ellipse(SKATER_X, GROUND_Y + 6, w * 0.32, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (frame) {
+      ctx.drawImage(frame, x, y, w, h);
+    } else {
+      // fallback placeholder: yellow rectangle, tilts slightly in the air
+      ctx.translate(SKATER_X, y + h / 2);
+      if (!skater.grounded) ctx.rotate(-0.12);
+      ctx.fillStyle = '#ffe14d';
+      ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.fillStyle = '#0d0d12';
+      ctx.fillRect(-w / 2 + 8, -h / 2 + 10, w - 16, 10); // "visor" detail so it reads as a character
+    }
+    ctx.restore();
+  }
+
+  function drawObstacle(o) {
+    const groundY = GROUND_Y;
+    ctx.save();
+
+    // the crushed can, tumbling as it flies/rolls toward the player.
+    // 'low' sits on the ground; 'high' flies at head height.
+    const centerY = o.variant === 'high'
+      ? (SKATER_HEAD_Y - HIGH_CAN_GAP) - o.h / 2
+      : groundY - o.h / 2;
+    ctx.translate(o.x, centerY);
+    ctx.rotate(o.rot);
+    if (canImageOk) {
+      ctx.drawImage(canImage, -o.w / 2, -o.h / 2, o.w, o.h);
+    } else {
+      // fallback shape if the image failed to load
+      ctx.fillStyle = '#b23fd6';
+      ctx.fillRect(-o.w / 2, -o.h / 2, o.w, o.h);
+      ctx.strokeStyle = '#3a1050';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(-o.w / 2, -o.h / 2, o.w, o.h);
+    }
+
+    ctx.restore();
+  }
+
+  function drawHUD() {
+    ctx.save();
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'top';
+    ctx.font = 'bold 30px Impact, Arial, sans-serif';
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(GAME_W - 210, 10, 200, 90);
+    ctx.fillStyle = '#ffe14d';
+    ctx.fillText(String(Math.floor(score)).padStart(5, '0'), GAME_W - 20, 16);
+    ctx.font = '13px Arial, sans-serif';
+    ctx.fillStyle = '#cfcfd8';
+    ctx.fillText('SCORE', GAME_W - 20, 50);
+    ctx.font = 'bold 15px Impact, Arial, sans-serif';
+    ctx.fillStyle = '#4dffb8';
+    ctx.fillText('HI ' + String(highScore).padStart(5, '0'), GAME_W - 20, 64);
+    ctx.fillStyle = '#ff6ad5';
+    ctx.fillText('LEVEL ' + level, GAME_W - 20, 84);
+    ctx.restore();
+  }
+
+  function draw() {
+    drawBackground();
+    for (const o of obstacles) drawObstacle(o);
+    drawSkater();
+    drawHUD();
+  }
+
+  /* =======================================================
+     MAIN LOOP
+  ========================================================== */
+  function loop(ts) {
+    requestAnimationFrame(loop);
+    const dt = lastTs === null ? 0 : Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    if (state === 'playing') update(dt);
+    draw();
+  }
+  requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
