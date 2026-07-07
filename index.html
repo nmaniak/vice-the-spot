@@ -35,7 +35,7 @@
   <nav class="nav" role="navigation" aria-label="Κύρια πλοήγηση">
     <div class="nav-tabs" role="tablist">
       <button class="nav-tab active" data-page="menu"    role="tab" aria-selected="true"  onclick="switchPage('menu')">Μενού</button>
-      <button class="nav-tab"        data-page="game"    role="tab" aria-selected="false" onclick="switchPage('game')">Game</button>
+      <button class="nav-tab"        data-page="gallery" role="tab" aria-selected="false" onclick="switchPage('gallery')">Ο Χώρος μας</button>
       <a class="nav-tab"
          href="https://search.google.com/local/writereview?placeid=ChIJ5QrGMQDTWRMRkhNZM8JuHYw"
          target="_blank"
@@ -45,6 +45,13 @@
 
   <div class="site-stripe">
     <span class="site-stripe-left">THE SPOT</span>
+    <div class="site-drip-bar">
+      <img src="images/branding/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left" aria-hidden="true"/>
+      <a href="#" class="menu-drip-logo-link" onclick="switchPage('menu'); return false;" aria-label="Vice KZN - Αρχική">
+        <img src="images/branding/vice-logo.png" alt="Vice" class="menu-drip-logo"/>
+      </a>
+      <img src="images/branding/drip_right.png" alt="" class="menu-drip-img menu-drip-img--right" aria-hidden="true"/>
+    </div>
     <span class="site-stripe-right">KZN</span>
   </div>
 
@@ -54,15 +61,6 @@
          PAGE: ΜΕΝΟΥ
     ══════════════════════════════════ -->
     <div id="page-menu" class="page active" role="tabpanel">
-
-      <!-- Drip header -->
-      <div class="menu-drip-bar">
-        <img src="assets/images/drip_left.png" alt="" class="menu-drip-img menu-drip-img--left" aria-hidden="true"/>
-        <a href="#" class="menu-drip-logo-link" onclick="switchPage('menu'); return false;" aria-label="Vice KZN - Αρχική">
-          <img src="assets/images/vice-logo.png" alt="Vice" class="menu-drip-logo"/>
-        </a>
-        <img src="assets/images/drip_right.png" alt="" class="menu-drip-img menu-drip-img--right" aria-hidden="true"/>
-      </div>
 
       <!-- Filter bar -->
       <div class="filter-bar" role="group" aria-label="Φίλτρα κατηγοριών">
@@ -338,19 +336,61 @@
 
 
     <!-- ══════════════════════════════════
-         PAGE: GAME
+         PAGE: Ο ΧΩΡΟΣ ΜΑΣ
     ══════════════════════════════════ -->
-    <div id="page-game" class="page" role="tabpanel">
-      <div class="game-wrap">
-        <canvas id="gameCanvas"></canvas>
-        <p class="game-hint">SPACE / TAP TO JUMP &nbsp;·&nbsp; DODGE THE DONUTS</p>
+    <div id="page-gallery" class="page" role="tabpanel">
+      <div class="gallery-container">
+        <div class="gallery-grid">
+          <div class="gallery-item gallery-item--featured">
+            <img src="images/our-space/IMG_3719.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3707.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3710.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3722.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3734.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3738.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3739.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3743.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3748.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3749.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3750.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3753.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3758.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+          <div class="gallery-item">
+            <img src="images/our-space/IMG_3761.JPG" alt="Vice KZN – ο χώρος μας" loading="lazy"/>
+          </div>
+        </div>
       </div>
     </div>
 
   </main>
 
   <footer class="site-footer" aria-label="Footer">
-    <img src="assets/images/thespot-graffiti.png" alt="The Spot." class="footer-graffiti" loading="lazy"/>
+    <img src="images/branding/thespot-graffiti.png" alt="The Spot." class="footer-graffiti" loading="lazy"/>
     <div class="footer-socials">
       <a href="https://www.facebook.com/p/Vicekzn-61571378348129/"
          target="_blank" rel="noopener noreferrer"

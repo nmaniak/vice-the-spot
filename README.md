@@ -9,8 +9,9 @@ vice-the-spot/
 ├── index.html          # Όλη η εφαρμογή (single-page)
 ├── styles.css          # Όλα τα styles
 ├── script.js           # Όλη η λογική
-├── assets/
-│   └── images/         # Φωτογραφίες μαγαζιού (βάλε εδώ τα αρχεία)
+├── images/
+│   ├── branding/       # Λογότυπα, drips, graffiti
+│   └── our-space/      # Φωτογραφίες μαγαζιού
 └── README.md
 ```
 
@@ -43,7 +44,7 @@ git push -u origin main
 
 ## Προσθήκη Φωτογραφιών (Gallery)
 
-1. Βάλε τις φωτογραφίες στο `assets/images/` (π.χ. `bar.jpg`, `vibes.jpg` κ.λπ.)
+1. Βάλε τις φωτογραφίες στο `images/our-space/` (π.χ. `bar.jpg`, `vibes.jpg` κ.λπ.)
 2. Στο `index.html`, βρες τα gallery items και αντικατέστησε:
 
 ```html
@@ -51,7 +52,7 @@ git push -u origin main
 <div class="gallery-placeholder">🍹</div>
 
 <!-- Μετά (πραγματική εικόνα) -->
-<img src="assets/images/bar.jpg" alt="The Bar" loading="lazy">
+<img src="images/our-space/bar.jpg" alt="The Bar" loading="lazy">
 ```
 
 ## Brand Colors
