@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Skate Game</title>
 <style>
   /* =======================================
@@ -13,6 +16,7 @@
   html, body {
     width: 100%;
     height: 100%;
+    height: 100dvh; /* actual visible height once mobile browser chrome settles; 100% is the fallback above */
     overflow: hidden;
     background: #0d0d12;
     font-family: 'Segoe UI', Arial, sans-serif;
@@ -22,13 +26,17 @@
   }
 
   /* Outer layout: header, game stage, footer stacked vertically.
-     This whole block is what goes fullscreen. */
+     This whole block is what goes fullscreen. Safe-area padding keeps
+     content clear of notches/home-indicators when running fullscreen
+     or added-to-home-screen with viewport-fit=cover. */
   #appRoot {
     display: flex;
     flex-direction: column;
     width: 100%;
     height: 100%;
+    height: 100dvh;
     background: #0d0d12;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 
   /* =======================================
@@ -252,6 +260,10 @@
      pixel buffer for the device's pixel ratio (crisp on retina).
   ========================================================== */
   function resize() {
+    // stageWrap's own box already reflects the current viewport correctly
+    // once #appRoot uses 100dvh — the visualViewport listeners below exist
+    // just to tell us *when* mobile Safari's address bar has changed size,
+    // triggering this same recalculation.
     const availW = stageWrap.clientWidth;
     const availH = stageWrap.clientHeight;
 
@@ -271,14 +283,39 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // draw in logical GAME_W/GAME_H units
   }
   window.addEventListener('resize', resize);
-  window.addEventListener('orientationchange', resize);
+  window.addEventListener('orientationchange', () => setTimeout(resize, 50));
   document.addEventListener('fullscreenchange', resize);
   document.addEventListener('webkitfullscreenchange', resize);
+  if (window.visualViewport) {
+    // iOS Safari fires these as its address bar collapses/expands, which
+    // plain window 'resize' often misses.
+    window.visualViewport.addEventListener('resize', resize);
+    window.visualViewport.addEventListener('scroll', resize);
+  }
   resize();
 
   /* =======================================================
      FULLSCREEN TOGGLE
+     The standard Fullscreen API (requestFullscreen) is NOT supported by
+     iPhone Safari for regular page content — only by desktop browsers,
+     Android browsers, and iPadOS Safari. Real fullscreen (no browser
+     chrome at all) on iPhone only happens when the page is added to the
+     Home Screen (see the apple-mobile-web-app-capable meta tag above),
+     which we can't trigger programmatically — the user has to do that
+     via Safari's Share sheet.
+     So: hide the button entirely where the API plain doesn't exist, and
+     where it does, use it. For iPhone Safari specifically we also nudge
+     the page to collapse Safari's address bar as a smaller consolation.
   ========================================================== */
+  const isIOS = /iP(hone|od|ad)/.test(navigator.platform) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document); // iPadOS reports as Mac
+  const isStandalone = window.navigator.standalone === true; // already added to Home Screen
+  const fullscreenApiSupported = !!(appRoot.requestFullscreen || appRoot.webkitRequestFullscreen);
+
+  if (!fullscreenApiSupported) {
+    fullscreenBtn.style.display = 'none';
+  }
+
   fullscreenBtn.addEventListener('click', () => {
     const isFs = document.fullscreenElement || document.webkitFullscreenElement;
     if (!isFs) {
@@ -288,6 +325,17 @@
     }
     setTimeout(resize, 100); // resize after the browser finishes the FS transition
   });
+
+  // Best-effort "more screen space" nudge for iPhone Safari when it's not
+  // running standalone (added to Home Screen) and has no real fullscreen
+  // API: scrolling the page by 1px prompts Safari to collapse its address
+  // bar into the minimal-UI state.
+  if (isIOS && !isStandalone && !fullscreenApiSupported) {
+    const nudge = () => window.scrollTo(0, 1);
+    window.addEventListener('load', nudge);
+    window.addEventListener('orientationchange', () => setTimeout(nudge, 300));
+    document.addEventListener('touchend', nudge, { once: true });
+  }
 
   /* =======================================================
      ASSET LOADING
